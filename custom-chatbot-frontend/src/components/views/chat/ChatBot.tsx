@@ -30,6 +30,11 @@ const ChatBot: React.FC = () => {
     });
 
     socket.current.on("message", handleMessage);
+    return () => {
+      socket.current.off("connect_response");
+      socket.current.off("message", handleMessage);
+      socket.current.disconnect();
+    };
   }, []);
 
   const sendMessage = (data: any) => {
