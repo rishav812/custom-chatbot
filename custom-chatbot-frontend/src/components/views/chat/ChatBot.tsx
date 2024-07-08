@@ -22,7 +22,7 @@ const ChatBot: React.FC = () => {
 
   useEffect(() => {
     const handleMessage = (message: any) => {
-      console.log("message is being sent=======");
+      console.log("message is =======");
       setMessages((prevMessages) => [...prevMessages, message]);
     };
 
@@ -65,6 +65,7 @@ const ChatBot: React.FC = () => {
   };
 
   console.log("connect====>", connect);  
+  console.log("message===",messages)
 
   return (
     <div className="chatContainer">

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import socketio
-from app.features.router import SocketManager, router
+from app.features.bot.router import SocketManager, router
 
 # from app.socketio_server import sio
 
