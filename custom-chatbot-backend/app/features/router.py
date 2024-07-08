@@ -1,9 +1,13 @@
-import datetime
-from fastapi import APIRouter, FastAPI
-
-# from app.socketio_server import get_socketio_server, ConnectionManager
-
+import json
 import socketio
+from fastapi import FastAPI, APIRouter
+from datetime import datetime
+
+# from app.main import get_application
+
+app = FastAPI()
+router = APIRouter()
+# _app = get_application()
 
 
 class SocketManager:
@@ -14,55 +18,48 @@ class SocketManager:
             engineio_logger=True,
         )
         self.app = socketio.ASGIApp(self.server)
+        self.active_client_sid = None
 
-    @property
-    def on(self):
-        return self.server.on
+        self.register_handlers()
 
-    @property
-    def send(self):
-        return self.server.send
+    def register_handlers(self):
+        @self.server.event
+        async def connect(sid, environ):
+            if self.active_client_sid is None:
+                self.active_client_sid = sid
+                print(f"Client connected: {sid}")
+            # else:
+            #     print(f"Rejecting connection attempt from: {sid}")
+            #     await self.server.disconnect(sid)
+
+        @self.server.event
+        async def disconnect(sid):
+            if sid == self.active_client_sid:
+                print(f"Client disconnected: {sid}")
+                await self.server.disconnect(sid)
+                self.active_client_sid = None
+
+        @self.server.event
+        async def message(sid, data):
+            # try:
+                now = datetime.utcnow()
+                current_time = now.strftime("%H:%M")
+                isError = False
+                print("handle-MESSAGES====================...")
+                print(f"Message from {sid}: {data}")
+                mt = data.get("mt", "")
+                print("mt====",mt)
+                # if mt == "message_upload":
+                    # await handle_message_upload(data, sid, current_time, websocket)
+                await self.server.send(sid, f"Received your message: {data}")
 
     def mount_to(self, path: str, app):
         app.mount(path, self.app)
 
 
-# Initialize the FastAPI app and SocketManager
-
 socket_manager = SocketManager()
-
-active_client_sid = None
-
-
-def handle_disconnect(sid, environ):
-    global active_client_sid
-    if sid == active_client_sid:
-        print(f"Client disconnected: {sid}")
-        active_client_sid = None
-
-
-def handle_connect(sid, environ):
-    global active_client_sid
-    if active_client_sid is None:
-        active_client_sid = sid
-        print(f"Client connected: {sid}")
-    else:
-        print(f"Rejecting connection attempt from: {sid}")
-        socket_manager.on("disconnect", handler=handle_disconnect)
-    # while True:
-    #     # data = await websocket.receive_text()
-    #     socket_manager.on("message", handler=handle_message)
-
-
-def handle_message(sid, data):
-    print(f"Message from {sid}: {data}")
-    socket_manager.send(sid, f"Received your message: {data}")
-
-
-# socket_manager.on("message", handler=handle_message)
-socket_manager.on("connect", handler=handle_connect)
-
-router = APIRouter()
+# socket_manager.mount_to("/socket.io", app)
+#  socket_app.mount_to("/socket.io", _app)
 
 
 @router.get("/text")
@@ -74,3 +71,6 @@ async def get_chat():
 @router.get("/getuser")
 async def get_users():
     return {"message": "List of users"}
+
+
+app.include_router(router)

@@ -16,11 +16,12 @@ def get_application():
         allow_headers=["*"],
     )
     _app.include_router(router, prefix="/api", tags=["api"])
-    socket_app=SocketManager()
+    socket_app = SocketManager()
     socket_app.mount_to("/socket.io", _app)
     return _app
 
-app=get_application()
+
+app = get_application()
 
 
 # from fastapi import FastAPI

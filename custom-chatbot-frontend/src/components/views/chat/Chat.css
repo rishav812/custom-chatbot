@@ -25,6 +25,12 @@
     font-size: 18px;
 }
 
+.Header{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: -5px;
+}
+
 .chatHeader img {
     border-radius: 50%;
     margin-right: 10px;

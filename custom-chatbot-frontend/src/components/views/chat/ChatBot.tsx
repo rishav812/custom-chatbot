@@ -16,43 +16,66 @@ const ChatBot: React.FC = () => {
     formState: { errors },
   } = useForm<IFormInput>();
   const [messages, setMessages] = useState<string[]>([]);
-   const socket = useRef(
-     io("http://localhost:8000/", { path: "/socket.io/ws" })
-   );
+
+  const [connect, setConnect] = useState(false);
+  const socketRef = useRef<any>();
 
   useEffect(() => {
     const handleMessage = (message: any) => {
+      console.log("message is being sent=======");
       setMessages((prevMessages) => [...prevMessages, message]);
     };
 
-    socket.current.on("connect_response", (data: any) => {
-      console.log("Connected with ID:", data.chat_id);
-    });
+    if (!socketRef.current) {
+      const socket = io("http://localhost:8000/", { path: "/socket.io/" });
+      socketRef.current = socket;
 
-    socket.current.on("message", handleMessage);
-    return () => {
-      socket.current.off("connect_response");
-      socket.current.off("message", handleMessage);
-      socket.current.disconnect();
-    };
+      socket.on("connect", () => {
+        setConnect(socket.connected);
+        console.log("Connected with ID:", socket.id);
+      });
+      socket.on("disconnect", () => {
+        setConnect(socket.connected);
+        console.log("Disconnected with ID:", socket.id);
+      });
+
+      socket.on("message", handleMessage);
+      return () => {
+        if (socketRef.current) {
+          socketRef.current.off("connect");
+          socketRef.current.off("disconnect");
+          socketRef.current.off("message");
+          socketRef.current.disconnect();
+        }
+      };
+    }
   }, []);
 
   const sendMessage = (data: any) => {
-    console.log("data.chatInput",data.chatInput)
-    // const messageData = {
-    //   mt: "message_upload",
-    //   message: data.chatInput,
-    //   isBot: false,
-    //   timezone: moment().format("Z").toString(),
-    // };
-    socket.current.emit("message", data.chatInput);
+    const socket = socketRef.current;
+    if (socket && socket.connected) {
+      const messageData = {
+        mt: "message_upload",
+        message: data.chatInput,
+        isBot: false,
+        timezone: moment().format("Z").toString(),
+      };
+      socket.emit("message", messageData);
+    }
   };
+
+  console.log("connect====>", connect);  
 
   return (
     <div className="chatContainer">
       <div className="chatHeader">
-        <div>
-          <div>AI Dev</div>
+        <div className="Header">
+          <div>
+            <div>AI Dev</div>
+          </div>
+          <div>
+            <p>{connect ? "online" : "offline"}</p>
+          </div>
         </div>
       </div>
       <ul className="messageList">
