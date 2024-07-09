@@ -22,7 +22,9 @@ const ChatBot: React.FC = () => {
 
   useEffect(() => {
     const handleMessage = (message: any) => {
-      console.log("message is =======");
+      console.log("handledata",message)
+      const newChatData = JSON.parse(message);
+      console.log("newChatData =======", newChatData);
       setMessages((prevMessages) => [...prevMessages, message]);
     };
 
@@ -39,7 +41,7 @@ const ChatBot: React.FC = () => {
         console.log("Disconnected with ID:", socket.id);
       });
 
-      socket.on("message", handleMessage);
+      socket.on("new_message", handleMessage);
       return () => {
         if (socketRef.current) {
           socketRef.current.off("connect");
@@ -64,8 +66,7 @@ const ChatBot: React.FC = () => {
     }
   };
 
-  console.log("connect====>", connect);  
-  console.log("message===",messages)
+  console.log("messageState===>",messages);
 
   return (
     <div className="chatContainer">

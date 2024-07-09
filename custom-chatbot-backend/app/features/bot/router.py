@@ -63,7 +63,9 @@ class SocketManager:
                 mt="message_upload_confirm",
             )
             print("message====",message)
-            await server.emit('new_message', json.dumps(message.dict()), room=sid)                 
+            await server.emit('new_message', json.dumps(message.dict()), room=sid)
+            
+                             
 
     def mount_to(self, path: str, app):
         app.mount(path, self.app)
