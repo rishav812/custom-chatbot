@@ -3,6 +3,7 @@ import socketio
 from fastapi import FastAPI, APIRouter
 from datetime import datetime
 
+from app.features.bot.message import BotMessage
 from app.features.bot.schemas import MessageData
 
 # from app.main import get_application
@@ -54,6 +55,7 @@ class SocketManager:
                 if mt == "message_upload":
                     await handle_message_upload(data, sid, current_time, self.server)
                 # await self.server.send(sid, f"Received your message: {data}")
+
         async def handle_message_upload(data, sid, current_time,server ):
             message = MessageData(
                 time=current_time,
@@ -63,7 +65,13 @@ class SocketManager:
                 mt="message_upload_confirm",
             )
             print("message====",message)
+
             await server.emit('new_message', json.dumps(message.dict()), room=sid)
+
+            bot_message = BotMessage(
+            sid=sid,
+            time_zone=message["timezone"],
+    )
             
                              
 

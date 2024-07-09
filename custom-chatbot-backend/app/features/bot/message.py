@@ -1,4 +1,5 @@
 from app.features.bot.utils.greeting_response import create_greetings_response
+from app.features.bot.utils.local_semantic_similarity.auto_reply import can_auto_reply
 
 
 class BotMessage:
