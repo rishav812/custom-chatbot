@@ -16,16 +16,27 @@ const ChatBot: React.FC = () => {
     formState: { errors },
   } = useForm<IFormInput>();
   const [messages, setMessages] = useState<string[]>([]);
+  const [appendText, setAppendText] = useState("");
+  const chunkMessageRef = useRef<{ text: string }>({
+    text: "",
+  });
 
   const [connect, setConnect] = useState(false);
   const socketRef = useRef<any>();
 
   useEffect(() => {
     const handleMessage = (message: any) => {
-      console.log("handledata",message)
-      const newChatData = JSON.parse(message);
-      console.log("newChatData =======", newChatData);
-      setMessages((prevMessages) => [...prevMessages, message]);
+      console.log("handledata", message);
+      if (message.mt === "chat_message_bot_partial") {
+        chunkMessageRef.current = {
+          text: (chunkMessageRef.current.text ?? "")+(message.partial??""),
+        };
+        setAppendText(chunkMessageRef.current.text)
+      }
+      else if(message.mt==="message_upload_confirm"){
+        
+      }
+      // setMessages((prevMessages) => [...prevMessages, message]);
     };
 
     if (!socketRef.current) {
@@ -66,7 +77,7 @@ const ChatBot: React.FC = () => {
     }
   };
 
-  console.log("messageState===>",messages);
+  console.log("messageState===>", messages);
 
   return (
     <div className="chatContainer">

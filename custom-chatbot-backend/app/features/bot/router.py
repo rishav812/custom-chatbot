@@ -4,7 +4,8 @@ from fastapi import FastAPI, APIRouter
 from datetime import datetime
 
 from app.features.bot.message import BotMessage
-from app.features.bot.schemas import MessageData
+from app.features.bot.schemas import MessageData, MessageUploadData
+from app.features.bot.socket_response import SocketIOResponse
 
 # from app.main import get_application
 
@@ -45,40 +46,45 @@ class SocketManager:
         @self.server.event
         async def message(sid, data):
             # try:
-                now = datetime.utcnow()
-                current_time = now.strftime("%H:%M")
-                isError = False
-                print("handle-MESSAGES====================...")
-                print(f"Message from {sid}: {data}")
-                mt = data.get("mt", "")
-                print("mt====",mt)
-                if mt == "message_upload":
-                    await handle_message_upload(data, sid, current_time, self.server)
-                # await self.server.send(sid, f"Received your message: {data}")
+            now = datetime.utcnow()
+            current_time = now.strftime("%H:%M")
+            isError = False
+            print("handle-MESSAGES====================...")
+            print(f"Message from {sid}: {data}")
+            mt = data.get("mt", "")
+            print("mt====", mt)
+            if mt == "message_upload":
+                await handle_message_upload(data, sid, current_time, self.server)
+            # await self.server.send(sid, f"Received your message: {data}")
 
-        async def handle_message_upload(data, sid, current_time,server ):
+        async def handle_message_upload(data, sid, current_time, server):
+            upload_data = MessageUploadData(**data)
+            print("uploadData====", upload_data)
             message = MessageData(
                 time=current_time,
-                chatId=sid, 
-                message=data.get("message"),
-                isBot=data.get("isBot"),
+                chatId=sid,
+                message=upload_data.message,
+                isBot=upload_data.isBot,
                 mt="message_upload_confirm",
             )
-            print("message====",message)
+            # print("message====", data["message"])
 
-            await server.emit('new_message', json.dumps(message.dict()), room=sid)
+            await server.emit("new_message", json.dumps(message.dict()), room=sid)
+
+            socket_response = SocketIOResponse(
+                sio=server,
+                sid=sid,
+            )
 
             bot_message = BotMessage(
-            sid=sid,
-            time_zone=message["timezone"],
-    )
-            
-                             
+                socket_response=socket_response,
+                sid=sid,
+                time_zone=upload_data.timezone,
+            )
+            no_answer_found = await bot_message.send_bot_message(upload_data.message)
 
     def mount_to(self, path: str, app):
         app.mount(path, self.app)
-
-        
 
 
 socket_manager = SocketManager()
