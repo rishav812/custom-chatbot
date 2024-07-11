@@ -9,13 +9,22 @@ interface IFormInput {
   chatInput: string;
 }
 
+interface IMessages {
+  mt: string;
+  sid: string;
+  partial?: string;
+  isBot?: Boolean;
+  message?: string;
+  time?: string;
+}
+
 const ChatBot: React.FC = () => {
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm<IFormInput>();
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<IMessages[]>([]);
   const [appendText, setAppendText] = useState("");
   const chunkMessageRef = useRef<{ text: string }>({
     text: "",
@@ -26,17 +35,22 @@ const ChatBot: React.FC = () => {
 
   useEffect(() => {
     const handleMessage = (message: any) => {
-      console.log("handledata", message);
-      if (message.mt === "chat_message_bot_partial") {
+      const data = JSON.parse(message);
+      console.log("data====>", data);
+      if (data.mt === "chat_message_bot_partial") {
         chunkMessageRef.current = {
-          text: (chunkMessageRef.current.text ?? "")+(message.partial??""),
+          text: (chunkMessageRef.current.text ?? "") + (data.partial ?? ""),
         };
-        setAppendText(chunkMessageRef.current.text)
+        setAppendText(chunkMessageRef.current.text);
+      } else if (data.mt === "message_upload_confirm") {
+        if (!data.isBot) {
+          console.log("here comes user message first");
+          setMessages((prevMessages) => [...prevMessages, data]);
+        }
+        if (data.isBot) {
+          setMessages((prevMessages) => [...prevMessages, data]);
+        }
       }
-      else if(message.mt==="message_upload_confirm"){
-        
-      }
-      // setMessages((prevMessages) => [...prevMessages, message]);
     };
 
     if (!socketRef.current) {
@@ -93,8 +107,11 @@ const ChatBot: React.FC = () => {
       </div>
       <ul className="messageList">
         {messages.map((message, index) => (
-          <li className="messageItem" key={index}>
-            {/* {message.message} */}
+          <li
+            key={index}
+            className={`messageItem ${message.isBot ? "bot" : "user"}`}
+          >
+            {message.message}
           </li>
         ))}
       </ul>

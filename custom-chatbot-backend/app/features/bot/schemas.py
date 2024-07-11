@@ -9,7 +9,12 @@ class MessageUploadData(BaseModel):
     
 class MessageData(BaseModel):
     time: str
-    chatId: str
+    sid: str
     message: str
     isBot: bool
     mt: str
+
+class MessagePartialUpload(BaseModel):
+     mt: str
+     sid: str
+     partial:str

@@ -1,10 +1,13 @@
 from datetime import datetime
+import json
 import re
 from uuid import uuid4
 from fastapi import logger
 import socketio
 from typing import Optional
 from collections.abc import AsyncGenerator
+
+from app.features.bot.schemas import MessageData, MessagePartialUpload
 
 
 class SocketIOResponse:
@@ -44,22 +47,19 @@ class SocketIOResponse:
             for t in text.split():
                 if t:
                     final_text += t
-                    await self.sio.emit(
-                        "new_message",
-                        {
-                            "mt": "chat_message_bot_partial",
-                            "sid": self.sid,
-                            "partial": t,
-                        },
+                    message = MessagePartialUpload(
+                        mt="chat_message_bot_partial", 
+                        sid=self.sid, 
+                        partial=t
                     )
+                    await self.sio.emit("new_message", json.dumps(message.dict()))
 
-            await self.sio.emit(
-                "new_message",
-                {
-                    "mt": "message_upload_confirm",
-                    "sid": self.sid,
-                    "message": text,
-                    "time": current_time,
-                    "isBot": True,
-                },
+            message = MessageData(
+                time=current_time,
+                sid=self.sid,
+                message=text,
+                isBot=True,
+                mt="message_upload_confirm",
             )
+
+            await self.sio.emit("new_message", json.dumps(message.dict()))

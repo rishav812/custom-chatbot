@@ -59,15 +59,14 @@ class SocketManager:
 
         async def handle_message_upload(data, sid, current_time, server):
             upload_data = MessageUploadData(**data)
-            print("uploadData====", upload_data)
             message = MessageData(
                 time=current_time,
-                chatId=sid,
+                sid=sid,
                 message=upload_data.message,
                 isBot=upload_data.isBot,
                 mt="message_upload_confirm",
             )
-            # print("message====", data["message"])
+            print("message====>", (message.dict()))
 
             await server.emit("new_message", json.dumps(message.dict()), room=sid)
 
