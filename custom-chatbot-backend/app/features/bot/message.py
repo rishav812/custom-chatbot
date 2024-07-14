@@ -1,6 +1,7 @@
 from app.features.bot.utils.greeting_response import create_greetings_response
 from app.features.bot.utils.local_semantic_similarity.auto_reply import can_auto_reply
-
+from app.features.bot.utils.response import generate_response
+# AIzaSyB0UjIOMxAH8DVQJWeojCIMXk2SmpSSmPQ
 
 class BotMessage:
     """
@@ -55,3 +56,13 @@ class BotMessage:
         """
         if await self.auto_reply_handler(user_input, "greeting"):
             return False
+        
+        gemini_resp=await generate_response(user_input)
+        await self.socket_response.create_bot_response(
+                gemini_resp,
+                self.time_zone,
+                None,
+                msg_type="normal_msg"
+        )
+
+        

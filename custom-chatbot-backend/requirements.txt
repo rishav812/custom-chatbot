@@ -5,3 +5,5 @@ alembic==1.13.2
 python-socketio==5.11.3
 transformers==4.42.3  # https://github.com/huggingface/transformers
 sentence-transformers==3.0.1   # https://github.com/UKPLab/sentence-transformers
+google-generativeai==0.7.2
+python-dotenv==1.0.1
