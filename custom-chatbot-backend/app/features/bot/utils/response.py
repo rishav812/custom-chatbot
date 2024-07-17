@@ -15,6 +15,9 @@ genai.configure(api_key=api_key)
 async def generate_response(user_input):
     model = genai.GenerativeModel('gemini-1.5-flash')
     response = model.generate_content(user_input)
-    print("gemini-response====>",response.text)
-    return response
+    response_text = response._result.candidates[0].content.parts[0].text
+    print("gemini-response====>", response_text)
+    return response_text
+
+
 
