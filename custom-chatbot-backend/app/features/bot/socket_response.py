@@ -41,10 +41,10 @@ class SocketIOResponse:
         now = datetime.utcnow()
         current_time = now.strftime("%H:%M")
         final_text = ""
-        print("text===>", text)
+        print("text===>", text,"typee===============",type(text))
         # text = self.async_word_generator(text)
         if msg_type != "followup_msg":
-            for t in text.split():
+            for t in text:
                 if t:
                     final_text += t
                     message = MessagePartialUpload(
