@@ -41,16 +41,14 @@ class SocketIOResponse:
         now = datetime.utcnow()
         current_time = now.strftime("%H:%M")
         final_text = ""
-        print("text===>", text,"typee===============",type(text))
+        print("text===>", text, "typee===============", type(text))
         # text = self.async_word_generator(text)
         if msg_type != "followup_msg":
             for t in text:
                 if t:
                     final_text += t
                     message = MessagePartialUpload(
-                        mt="chat_message_bot_partial", 
-                        sid=self.sid, 
-                        partial=t
+                        mt="chat_message_bot_partial", sid=self.sid, partial=t
                     )
                     await self.sio.emit("new_message", json.dumps(message.dict()))
 

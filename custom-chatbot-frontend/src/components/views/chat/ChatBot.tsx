@@ -4,6 +4,7 @@ import moment from "moment";
 import "./Chat.css";
 import { Controller, useForm } from "react-hook-form";
 import CommonInput from "../../formElements/commonInput/commonInput";
+import BotIcon from "../../svgElements/BotIcon";
 
 interface IFormInput {
   chatInput: string;
@@ -19,6 +20,7 @@ interface IMessages {
 }
 
 const ChatBot: React.FC = () => {
+  const [openBot, setOpenBot] = useState(false);
   const {
     control,
     handleSubmit,
@@ -91,44 +93,54 @@ const ChatBot: React.FC = () => {
     }
   };
 
-  console.log("messageState===>", messages);
-
   return (
-    <div className="chatContainer">
-      <div className="chatHeader">
-        <div className="Header">
-          <div>
-            <div>AI Dev</div>
+    <div className="container">
+      {openBot && (
+        <div className="chatContainer">
+          <div className="chatHeader">
+            <div className="Header">
+              <div>
+                <div>AI Dev</div>
+              </div>
+              <div>
+                <p>{connect ? "online" : "offline"}</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <p>{connect ? "online" : "offline"}</p>
-          </div>
+          <ul className="messageList">
+            {messages.map((message, index) => (
+              <li
+                key={index}
+                className={`messageItem ${message.isBot ? "bot" : "user"}`}
+              >
+                {message.message}
+              </li>
+            ))}
+          </ul>
+          <form className="chatForm" onSubmit={handleSubmit(sendMessage)}>
+            <CommonInput
+              required
+              control={control}
+              className="chatInput"
+              name="chatInput"
+              placeholder="Type your message"
+              type="text"
+              error={errors?.chatInput}
+            />
+            <button className="chatButton" type="submit">
+              Send
+            </button>
+          </form>
         </div>
-      </div>
-      <ul className="messageList">
-        {messages.map((message, index) => (
-          <li
-            key={index}
-            className={`messageItem ${message.isBot ? "bot" : "user"}`}
-          >
-            {message.message}
-          </li>
-        ))}
-      </ul>
-      <form className="chatForm" onSubmit={handleSubmit(sendMessage)}>
-        <CommonInput
-          required
-          control={control}
-          className="chatInput"
-          name="chatInput"
-          placeholder="Type your message"
-          type="text"
-          error={errors?.chatInput}
-        />
-        <button className="chatButton" type="submit">
-          Send
-        </button>
-      </form>
+      )}
+
+      {/* <button
+        type="button"
+        className="bot-icon-box"
+        onClick={() => setOpenBot(!openBot)}
+      >
+        <BotIcon />
+      </button> */}
     </div>
   );
 };
