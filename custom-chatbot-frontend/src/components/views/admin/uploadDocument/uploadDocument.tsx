@@ -6,7 +6,12 @@ function UploadDocument() {
   const [openBot, setOpenBot] = useState(false);
   return (
     <div className="container">
-      <div className="chatContainer">{openBot && <ChatBot />}</div>
+      {openBot && (
+        <div className="chatContainer">
+          <ChatBot />
+        </div>
+      )}
+      
       <button
         type="button"
         className="bot-icon-box"

@@ -94,53 +94,41 @@ const ChatBot: React.FC = () => {
   };
 
   return (
-    <div className="container">
-      {openBot && (
-        <div className="chatContainer">
-          <div className="chatHeader">
-            <div className="Header">
-              <div>
-                <div>AI Dev</div>
-              </div>
-              <div>
-                <p>{connect ? "online" : "offline"}</p>
-              </div>
-            </div>
+    <div className="chatContainer">
+      <div className="chatHeader">
+        <div className="Header">
+          <div>
+            <div>AI Dev</div>
           </div>
-          <ul className="messageList">
-            {messages.map((message, index) => (
-              <li
-                key={index}
-                className={`messageItem ${message.isBot ? "bot" : "user"}`}
-              >
-                {message.message}
-              </li>
-            ))}
-          </ul>
-          <form className="chatForm" onSubmit={handleSubmit(sendMessage)}>
-            <CommonInput
-              required
-              control={control}
-              className="chatInput"
-              name="chatInput"
-              placeholder="Type your message"
-              type="text"
-              error={errors?.chatInput}
-            />
-            <button className="chatButton" type="submit">
-              Send
-            </button>
-          </form>
+          <div>
+            <p>{connect ? "online" : "offline"}</p>
+          </div>
         </div>
-      )}
-
-      {/* <button
-        type="button"
-        className="bot-icon-box"
-        onClick={() => setOpenBot(!openBot)}
-      >
-        <BotIcon />
-      </button> */}
+      </div>
+      <ul className="messageList">
+        {messages.map((message, index) => (
+          <li
+            key={index}
+            className={`messageItem ${message.isBot ? "bot" : "user"}`}
+          >
+            {message.message}
+          </li>
+        ))}
+      </ul>
+      <form className="chatForm" onSubmit={handleSubmit(sendMessage)}>
+        <CommonInput
+          required
+          control={control}
+          className="chatInput"
+          name="chatInput"
+          placeholder="Type your message"
+          type="text"
+          error={errors?.chatInput}
+        />
+        <button className="chatButton" type="submit">
+          Send
+        </button>
+      </form>
     </div>
   );
 };
