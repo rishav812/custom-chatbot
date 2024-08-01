@@ -1,7 +1,208 @@
-.container {
+/* .container {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
   position: relative;
 }
 
+.upload-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.upload-container h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.upload-box {
+  border: 2px dashed #ccc;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.upload-label {
+  display: block;
+  cursor: pointer;
+}
+
+.upload-label span {
+  font-size: 16px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.upload-label input {
+  display: none;
+}
+
+.upload-box p {
+  font-size: 14px;
+  color: #666;
+}
+
+.upload-button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.uploaded-file {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 20px;
+}
+
+.uploaded-file span {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.file-actions button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+
+.bot-icon-box {
+  width: 70px;
+  height: 70px;
+  float: left;
+  margin-top: 82vh;
+  margin-right: 40px;
+  border: 2px solid #236ad4;
+  border-radius: 10px;
+  background: white;
+  svg {
+    fill: #236ad4;
+  }
+}
+
+.bot-icon-box:hover{
+    background:black;
+    cursor: pointer;
+} */
+
+.upload-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+}
+
+.upload-container h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.upload-box {
+  border: 2px dashed #ccc;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.upload-label {
+  display: block;
+  cursor: pointer;
+}
+
+.upload-label span {
+  font-size: 16px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.upload-label input {
+  display: none;
+}
+
+.upload-box p {
+  font-size: 14px;
+  color: #666;
+}
+
+.upload-button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.uploaded-file {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 20px;
+  z-index: 1;
+}
+
+.uploaded-file span {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.file-actions button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.chat-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  z-index: 10;
+  padding: 20px;
+}
+
+.bot-icon-box {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 70px;
+  height: 70px;
+  background: white;
+  border: 2px solid #236ad4;
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 10px;
+  z-index: 11;
+}
+
+.bot-icon-box svg {
+  fill: #236ad4;
+}
+
+.bot-icon-box.bot-open {
+  z-index: 12;
+}

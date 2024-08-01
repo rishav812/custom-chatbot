@@ -5,25 +5,6 @@
   position: relative;
 }
 
-.bot-icon-box {
-  width: 70px;
-  height: 70px;
-  float: left;
-  margin-top: 82vh;
-  margin-right: 40px;
-  border: 2px solid #236ad4;
-  border-radius: 10px;
-  background: white;
-  svg {
-    fill: #236ad4;
-  }
-}
-
-.bot-icon-box:hover{
-    background:black;
-    cursor: pointer;
-}
-
 .chatContainer {
   display: flex;
   flex-direction: column;
