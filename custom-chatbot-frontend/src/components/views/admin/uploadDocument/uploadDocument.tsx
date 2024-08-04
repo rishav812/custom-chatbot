@@ -6,15 +6,21 @@ import './uploadDocument.css';
 const UploadDocument: React.FC = () => {
   const [openBot, setOpenBot] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [error, setError] = useState<string>("");
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setUploadedFile(event.target.files[0]);
+    const { files } = event.target;
+    if (files && files[0]?.size > 15728640) {
+      setError("File size cannot exceed 15 MB.")
+    } else if (files && files[0].type !== "application/pdf") {
+      setError("File format is not supported.");
+    }else{
+      if(files) setUploadedFile(files[0]);
+      setError("");
     }
   };
 
-  const handleUpload = () => {
-    // Handle file upload
+  const uploadDocument = () => {
     console.log("File uploaded:", uploadedFile);
   };
 
@@ -33,7 +39,8 @@ const UploadDocument: React.FC = () => {
         </label>
         <p>Maximum PDF size 15MB</p>
       </div>
-      <button className="upload-button" onClick={handleUpload}>
+      {error && <p className="error-message">{error}</p>}
+      <button className="upload-button" onClick={uploadDocument}>
         Upload
       </button>
       {uploadedFile && (

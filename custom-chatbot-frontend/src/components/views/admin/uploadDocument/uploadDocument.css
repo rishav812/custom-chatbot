@@ -206,3 +206,9 @@
 .bot-icon-box.bot-open {
   z-index: 12;
 }
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+}
