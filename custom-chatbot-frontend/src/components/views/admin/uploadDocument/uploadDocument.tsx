@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import ChatBot from "../../chat/ChatBot";
 import BotIcon from "../../../svgElements/BotIcon";
 import './uploadDocument.css';
+import { getPreSignedUrl } from "../../../../service/admin";
 
 const UploadDocument: React.FC = () => {
   const [openBot, setOpenBot] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [error, setError] = useState<string>("");
+  let fileNameWithTime = "";
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = event.target;
@@ -20,8 +22,22 @@ const UploadDocument: React.FC = () => {
     }
   };
 
-  const uploadDocument = () => {
+  const presignedUrl = async (fileName: string) => {
+    const fileNameTime=`${fileName.split('.')[0]}_${new Date().getDate()}`;
+    console.log("fileNameTime====>", fileNameTime);
+    fileNameWithTime = fileNameTime;
+    const response = await getPreSignedUrl({ fileFormat: fileNameTime });
+  };
+
+  const uploadDocument = async () => {
     console.log("File uploaded:", uploadedFile);
+    if(uploadedFile){
+      const file=uploadedFile;
+      let signedUrl="";
+      const presignedUrlData = await presignedUrl(file.name);
+      console.log("presignedUrlData====>>", presignedUrlData);
+    }
+
   };
 
   return (

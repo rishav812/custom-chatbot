@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import socketio
 from app.features.bot.router import SocketManager, router
+from app.features.admin.router import router as admin_router
 
 # from app.socketio_server import sio
 
@@ -10,12 +11,13 @@ def get_application():
     _app = FastAPI()
     _app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:3000/"],
+        allow_origins=["http://localhost:3000"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    _app.include_router(router, prefix="/api", tags=["api"])
+    router.include_router(router=admin_router)
+    _app.include_router(router, prefix="/api/v1", tags=["api"])
     socket_app = SocketManager()
     socket_app.mount_to("/socket.io", _app)
     return _app
