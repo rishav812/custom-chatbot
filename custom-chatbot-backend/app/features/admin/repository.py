@@ -1,7 +1,6 @@
 import boto3
 import os
 
-
 async def generate_presigned_url(filename: str):
     try:
         s3_client = boto3.client(
@@ -15,7 +14,8 @@ async def generate_presigned_url(filename: str):
             "Key": f"document/{filename}",
             "Bucket": bucket_name,
             "Expires": 60*60,
-            # "content-type":"application/pdf"
+            "content-type":"application/pdf",
+            "ACL": "public-read"
         }
         presigned_url = s3_client.generate_presigned_url(
             ClientMethod="put_object", Params=params, HttpMethod="PUT"

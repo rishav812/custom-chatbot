@@ -27,6 +27,7 @@ const UploadDocument: React.FC = () => {
     console.log("fileNameTime====>", fileNameTime);
     fileNameWithTime = fileNameTime;
     const response = await getPreSignedUrl({ fileFormat: fileNameTime });
+    return response;
   };
 
   const pushFileToS3 = async (signedUrl: string, file: Blob) => {
@@ -51,9 +52,10 @@ const UploadDocument: React.FC = () => {
       const file = uploadedFile;
       let signedUrl = "";
       const presignedUrlData: any = await presignedUrl(file.name);
-      if (presignedUrlData && presignedUrlData.data) {
+      console.log("presignedUrlData============",presignedUrlData.data.data)
+      if (presignedUrlData && presignedUrlData.data.data) {
         const response = await pushFileToS3(
-          presignedUrlData.data.toString(),
+          presignedUrlData.data.data.toString(),
           file
         );
       }
