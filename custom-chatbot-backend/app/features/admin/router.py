@@ -1,5 +1,6 @@
 from fastapi import FastAPI, APIRouter, Depends, Request
 
+from app.features.admin.repository import generate_presigned_url
 from app.features.admin.schemas import PreSignedUrl
 
 
@@ -12,13 +13,4 @@ async def create_signed_url(
     data: PreSignedUrl,
 ):
     print("data===>",data.fileFormat)
-    return {"message": "Hello World"}
-
-
-
-@router.get("/get-user")
-async def create_signed_url(
-    request: Request,
-):
-    # print("data===>", data.fileFormat)
-    return {"message": "Hello World"}
+    return await generate_presigned_url(data.fileFormat)

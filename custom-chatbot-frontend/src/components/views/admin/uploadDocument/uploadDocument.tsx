@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ChatBot from "../../chat/ChatBot";
 import BotIcon from "../../../svgElements/BotIcon";
-import './uploadDocument.css';
+import "./uploadDocument.css";
 import { getPreSignedUrl } from "../../../../service/admin";
 
 const UploadDocument: React.FC = () => {
@@ -13,31 +13,51 @@ const UploadDocument: React.FC = () => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = event.target;
     if (files && files[0]?.size > 15728640) {
-      setError("File size cannot exceed 15 MB.")
+      setError("File size cannot exceed 15 MB.");
     } else if (files && files[0].type !== "application/pdf") {
       setError("File format is not supported.");
-    }else{
-      if(files) setUploadedFile(files[0]);
+    } else {
+      if (files) setUploadedFile(files[0]);
       setError("");
     }
   };
 
   const presignedUrl = async (fileName: string) => {
-    const fileNameTime=`${fileName.split('.')[0]}_${new Date().getDate()}`;
+    const fileNameTime = `${fileName.split(".")[0]}_${new Date().getDate()}`;
     console.log("fileNameTime====>", fileNameTime);
     fileNameWithTime = fileNameTime;
     const response = await getPreSignedUrl({ fileFormat: fileNameTime });
   };
 
+  const pushFileToS3 = async (signedUrl: string, file: Blob) => {
+    try {
+      const myHeaders = new Headers({
+        "Content-Type": file.type,
+        ACL: "public-read",
+      });
+      return await fetch(signedUrl, {
+        method: "PUT",
+        headers: myHeaders,
+        body: file,
+      });
+    } catch (e) {
+      return e;
+    }
+  };
+
   const uploadDocument = async () => {
     console.log("File uploaded:", uploadedFile);
-    if(uploadedFile){
-      const file=uploadedFile;
-      let signedUrl="";
-      const presignedUrlData = await presignedUrl(file.name);
-      console.log("presignedUrlData====>>", presignedUrlData);
+    if (uploadedFile) {
+      const file = uploadedFile;
+      let signedUrl = "";
+      const presignedUrlData: any = await presignedUrl(file.name);
+      if (presignedUrlData && presignedUrlData.data) {
+        const response = await pushFileToS3(
+          presignedUrlData.data.toString(),
+          file
+        );
+      }
     }
-
   };
 
   return (
@@ -82,6 +102,6 @@ const UploadDocument: React.FC = () => {
       </button>
     </div>
   );
-}
+};
 
 export default UploadDocument;
