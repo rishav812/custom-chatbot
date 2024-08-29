@@ -23,7 +23,16 @@ const http = axios.create({
 
 export const getPreSignedUrl = (data: {
   fileFormat: string;
+  fileType:string
 }): Promise<ApiResponse> => {
   console.log("data===>", data);
   return http.post("/api/v1/admin/pre-signed-url", data);
+};
+
+export const uploadAdminDocuments = (data: {
+  fileName: string;
+  signedUrl: any;
+}): Promise<ApiResponse> => {
+  console.log("data_urllll===========",data)
+  return http.post("/api/v1/admin/upload-document", data);
 };
