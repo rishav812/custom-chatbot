@@ -1,19 +1,24 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import ChatBot from "../../chat/ChatBot";
 import BotIcon from "../../../svgElements/BotIcon";
 import "./uploadDocument.css";
 import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import { app } from "../../../../firebase";
+import {
   getPreSignedUrl,
   uploadAdminDocuments,
 } from "../../../../service/admin";
+import Base64 from 'base64-js';
 
 const UploadDocument: React.FC = () => {
   const [openBot, setOpenBot] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  // const [base64Url, setBase64Url] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
-  let fileNameWithTime = "";
-  let base64Url="";
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = event.target;
@@ -54,16 +59,29 @@ const UploadDocument: React.FC = () => {
   //   }
   // };
 
-  const convertToBase64 = (file: File) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      const base64 = reader.result as string;
-      // setBase64Url(base64);
-    };
-    reader.onerror = (error) => {
-      console.error("Error converting file to Base64:", error);
-    };
+  const storePdfFile = async (file: any) => {
+    return new Promise((resolve, reject) => {
+      const storage = getStorage(app);
+      const fileName = new Date().getTime() + file.name;
+      const storageRef = ref(storage, fileName);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload is ${progress}% done`);
+        },
+        (error) => {
+          reject(error);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            resolve(downloadURL);
+          });
+        }
+      );
+    });
   };
 
   const uploadDocument = async () => {
@@ -74,22 +92,8 @@ const UploadDocument: React.FC = () => {
     );
     if (uploadedFile) {
       const file = uploadedFile;
-      const fileNameTime = `${file.name.split(".")[0]}_${new Date().getTime()}`;
-      const base64Url = convertToBase64(file);
-      console.log("base64Url====vvvvvv", base64Url);
-      const res = await uploadAdminDocuments({
-        fileName: fileNameTime,
-        signedUrl: base64Url,
-      });
-      // let signedUrl = "";
-      // const presignedUrlData: any = await presignedUrl(file,file.name);
-      // console.log("presignedUrlData============",presignedUrlData.data.data)
-      // if (presignedUrlData && presignedUrlData.data.data) {
-      //   const response = await pushFileToS3(
-      //     presignedUrlData.data.data,
-      //     file
-      //   );
-      // }
+      const promise= await storePdfFile(file)
+      console.log("promise=========",promise)
     }
   };
 

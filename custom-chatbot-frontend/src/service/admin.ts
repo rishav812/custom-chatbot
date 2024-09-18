@@ -31,7 +31,7 @@ export const getPreSignedUrl = (data: {
 
 export const uploadAdminDocuments = (data: {
   fileName: string;
-  signedUrl: any;
+  signedUrl: string;
 }): Promise<ApiResponse> => {
   console.log("data_urllll===========",data)
   return http.post("/api/v1/admin/upload-document", data);
