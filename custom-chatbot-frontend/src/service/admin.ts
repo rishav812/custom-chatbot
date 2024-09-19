@@ -33,6 +33,6 @@ export const uploadAdminDocuments = (data: {
   fileName: string;
   signedUrl: string;
 }): Promise<ApiResponse> => {
-  console.log("data_urllll===========",data)
+  console.log("data_urllll===========>", data);
   return http.post("/api/v1/admin/upload-document", data);
 };

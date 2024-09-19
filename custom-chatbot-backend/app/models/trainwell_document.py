@@ -2,8 +2,8 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime, Integer, String, true
 from app.database import Base
 
-class TrainwellDocument(Base):
-    __tablename__ = "trainwell_documents"
+class TrainedDocument(Base):
+    __tablename__ = "trained_documents"
     id=Column(Integer,primary_key=True,index=True)
     name=Column(String,nullable=True)
     url=Column(String,nullable=True)

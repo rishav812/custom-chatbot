@@ -85,15 +85,18 @@ const UploadDocument: React.FC = () => {
   };
 
   const uploadDocument = async () => {
-    console.log(
-      "File uploaded:",
-      uploadedFile,
-      uploadedFile?.name.split(".")[0]
-    );
     if (uploadedFile) {
       const file = uploadedFile;
-      const promise= await storePdfFile(file)
-      console.log("promise=========",promise)
+      const url = await storePdfFile(file)
+      console.log("url=========",url)
+      if(url){
+        // console.log("filee name=",file.name.split(".")[0])
+        const res = await uploadAdminDocuments({
+          fileName: file.name.split(".")[0],
+          signedUrl: url as string,
+        });
+        console.log("ress=======",res)
+      }
     }
   };
 

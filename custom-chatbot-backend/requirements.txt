@@ -9,3 +9,5 @@ google-generativeai==0.7.2
 python-dotenv==1.0.1
 boto3==1.34.156
 psycopg2==2.9.9
+pyPDF==3.0.1
+firebase-admin==6.5.0
