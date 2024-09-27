@@ -13,7 +13,7 @@ import {
   getPreSignedUrl,
   uploadAdminDocuments,
 } from "../../../../service/admin";
-import Base64 from 'base64-js';
+import Base64 from "base64-js";
 
 const UploadDocument: React.FC = () => {
   const [openBot, setOpenBot] = useState(false);
@@ -62,7 +62,7 @@ const UploadDocument: React.FC = () => {
   const storePdfFile = async (file: any) => {
     return new Promise((resolve, reject) => {
       const storage = getStorage(app);
-      const fileName = new Date().getTime() + file.name;
+      const fileName = file.name;
       const storageRef = ref(storage, fileName);
       const uploadTask = uploadBytesResumable(storageRef, file);
       uploadTask.on(
@@ -87,22 +87,22 @@ const UploadDocument: React.FC = () => {
   const uploadDocument = async () => {
     if (uploadedFile) {
       const file = uploadedFile;
-      const url = await storePdfFile(file)
-      console.log("url=========",url)
-      if(url){
+      const url = await storePdfFile(file);
+      console.log("url=========", url);
+      if (url) {
         // console.log("filee name=",file.name.split(".")[0])
         const res = await uploadAdminDocuments({
           fileName: file.name.split(".")[0],
           signedUrl: url as string,
         });
-        console.log("ress=======",res)
+        console.log("ress=======", res);
       }
     }
   };
 
   return (
     <div className="upload-container">
-      <h2>Training Documents</h2>
+      {/* <h2>Training Documents</h2> */}
       <div className="upload-box">
         <label htmlFor="file-upload" className="upload-label">
           <span>Upload PDF here</span>
