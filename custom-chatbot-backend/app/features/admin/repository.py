@@ -16,42 +16,14 @@ from app.models.trained_document import TrainedDocument
 from app.models.keywords import Keywords
 import os
 from dotenv import load_dotenv
+
+from app.utils.milvus.operation.crud import _insert_keywords_to_milvus
+
  
 cred = credentials.Certificate("./app/config/serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {"storageBucket": "pdf-bot-15cec.appspot.com"})
- 
 ai21_api_key = os.getenv('AI21_API_KEY')
- 
- 
-# async def generate_presigned_url(filename: str, filetype: str):
-#     print("fileType=======", filetype)
-#     try:
-#         s3_client = boto3.client(
-#             "s3",
-#             region_name=region_name,
-#             aws_access_key_id=aws_access_key,
-#             aws_secret_access_key=aws_secret_access_key,
-#             config=boto3.session.Config(signature_version="v4"),
-#         )
-#         params = {
-#             "Key": f"{filename}.pdf",
-#             "Bucket": bucket_name,
-#             "Expires": 3600,
-#             "ContentType": "application/pdf",
-#             "ACL": "public-read",
-#         }
-#         presigned_url = s3_client.generate_presigned_url(
-#             ClientMethod="put_object", Params=params
-#         )
-#         print("presigned_url===>", presigned_url)
-#         return {
-#             "data": presigned_url,
-#             "success": True,
-#             "message": "generate_presigned_url.",
-#         }
-#     except Exception as e:
-#         raise e
- 
+
  
 def download_pdf_from_firebase(pdf_file_path: str, local_file_name: str):
     bucket = storage.bucket()
@@ -113,7 +85,6 @@ def train_document(text, document_id):
             db.commit()
 
             print(f"Chunk with id {chunk.id} is insert successfully")
-            print("chunk-id===>",str(chunk.id),type(str(chunk.id)))
             chunk_id=str(chunk.id)
             insert_to_keywords_table(db, keyword_list, chunk_id)
 
@@ -165,8 +136,6 @@ def insert_to_keywords_table(db, words:list[str], chunkId:str):
                 db.query(Keywords).filter(Keywords.name==word.lower()).first()
             )
             if existing_keyword and existing_keyword.id:
-                # print("existing_keyword.chunk_id======",existing_keyword.chunk_id, type(existing_keyword.chunk_id))
-                # existing_chunk_ids = existing_keyword.chunk_id.split(",")
                 existing_chunk_ids = existing_keyword.chunk_id.split(",")
                 existing_chunk_ids.append(str(chunkId))
 
@@ -186,6 +155,13 @@ def insert_to_keywords_table(db, words:list[str], chunkId:str):
                 print(f"Keyword with id {new_keyword.id} is insert successfully")
                 pg_id_array.append(new_keyword.id)
                 keywords_array.append(word)
+        
+        print("keywords_array===>",len(keywords_array), keywords_array,pg_id_array)
+            
+        if len(keywords_array):
+            print("insert_keywords_to_chroma========================")
+            _insert_keywords_to_milvus(pg_id_array, keywords_array)
+
     except Exception as e:
         print(e, "error in insert_to_keywords_table")
 

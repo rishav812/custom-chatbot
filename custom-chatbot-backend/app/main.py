@@ -1,14 +1,46 @@
+import asyncio
+from typing import List
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import socketio
 from app.features.bot.router import SocketManager, router as bot_router
 from app.features.admin.router import router as admin_router
+from app.models.milvus.collection.milvus_collection import create_collection
+from pymilvus import connections as milvus_connections
 
+from app.utils.milvus.operation.crud import initialize_milvus_collection
 # from app.socketio_server import sio
 
+milvus_alias = "default"
+
+
+def connect_to_milvus():
+    global milvus_alias
+    milvus_connections.connect(
+        alias=milvus_alias,
+        host="localhost",
+        port="19530",
+    )
+
+
+def disconnect_from_milvus():
+    global milvus_alias
+    milvus_connections.disconnect(alias=milvus_alias)
+
+
+async def lifespan(app: FastAPI):
+    global keyword_collection
+    connect_to_milvus()
+    # keyword_collection = create_collection()
+    initialize_milvus_collection()
+    yield  
+
+    tasks_to_close: List[asyncio.Future] = [disconnect_from_milvus()]
+
+    await asyncio.gather(*tasks_to_close, return_exceptions=True)
 
 def get_application():
-    _app = FastAPI()
+    _app = FastAPI(lifespan=lifespan)
     _app.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:3000"],
@@ -26,55 +58,3 @@ def get_application():
 
 
 app = get_application()
-
-
-# from fastapi import FastAPI
-# from app.routes import chatbot
-
-# app = FastAPI()
-# sio = socketio.AsyncServer(cors_allowed_origins="*", async_mode="asgi")
-# socket_app = socketio.ASGIApp(sio)
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["http://localhost:8000/"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-# app.mount("/", socket_app)
-
-# app.include_router(chatbot.router, prefix="/api", tags=["api"])
-# # app.include_router(item.router, prefix="/items", tags=["items"])
-
-
-# # @app.get("/")
-# # async def read_root():
-# #     return {"message": "Welcome to the API"}
-
-# Socket_io.py file
-# import socketio
-# from fastapi import FastAPI
-
-# # Fast API application
-# app = FastAPI()
-# # Socket io (sio) create a Socket.IO server
-# sio = socketio.AsyncServer(cors_allowed_origins="*", async_mode="asgi")
-# # wrap with ASGI application
-# socket_app = socketio.ASGIApp(sio,app)
-
-# @app.get("/get")
-# def read_root():
-#     return {"Hello": "World"}
-
-
-# app.mount("/", socket_app)
-
-
-# @sio.on("connect")
-# async def connect(sid, env):
-#     print("New Client Connected to This id :" + " " + str(sid))
-
-
-# @sio.on("disconnect")
-# async def disconnect(sid):
-#     print("Client Disconnected: " + " " + str(sid))
