@@ -11,7 +11,6 @@ def initialize_milvus_collection():
 
 
 def _insert_keywords_to_milvus(pg_ids: list[int], data: list[str]):
-    print("enter in chroma-function=======================")
     for i in range(0, len(data)):
         chunk = [data[i]]
        

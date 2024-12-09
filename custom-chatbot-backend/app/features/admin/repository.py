@@ -1,7 +1,6 @@
 from app.models.chunks import Chunk
 from datetime import datetime
 import threading
-import ai21
 import boto3
 import os
 import firebase_admin
@@ -18,11 +17,13 @@ import os
 from dotenv import load_dotenv
 
 from app.utils.milvus.operation.crud import _insert_keywords_to_milvus
+from langchain.text_splitter import LatexTextSplitter
 
  
 cred = credentials.Certificate("./app/config/serviceAccountKey.json")
 firebase_admin.initialize_app(cred, {"storageBucket": "pdf-bot-15cec.appspot.com"})
-ai21_api_key = os.getenv('AI21_API_KEY')
+# ai21_api_key = os.getenv('AI21_API_KEY')
+# print("ai21_key===>",ai21_api_key)
 
  
 def download_pdf_from_firebase(pdf_file_path: str, local_file_name: str):
@@ -49,7 +50,6 @@ def extract_text_from_pdf(pdf_file_path: str):
  
  
 def generate_keywords(complete_text, keyword_model):
- 
     keywords = keyword_model.extract_keywords(complete_text)
     keywords_list = [word[0] for word in keywords]
     keywords_string = ",".join(keywords_list)
@@ -60,14 +60,15 @@ def train_document(text, document_id):
         db = next(get_db())
         keyword_model = KeyBERT()
         milvus_batch_data = []
-        
-        chunks = AI21SemanticTextSplitter(
-            api_key= ai21_api_key, chunk_size=1000
-        ).split_text(text)
 
+        latex_splitter = LatexTextSplitter(chunk_size=1000, chunk_overlap=0)
+        chunks = latex_splitter.create_documents([text])
+        print("chunks====>",chunks)
+       
         print(f"The text has been splits into {len(chunks)} chunks")
 
-        for chunk in chunks:
+        for page in chunks:
+            chunk=page.page_content[0:]
             print("chunk=====",chunk)
             keywords_string, keyword_list = generate_keywords(
                 chunk,
@@ -159,7 +160,7 @@ def insert_to_keywords_table(db, words:list[str], chunkId:str):
         print("keywords_array===>",len(keywords_array), keywords_array,pg_id_array)
             
         if len(keywords_array):
-            print("insert_keywords_to_chroma========================")
+            print("insert_keywords_to_milvus========================")
             _insert_keywords_to_milvus(pg_id_array, keywords_array)
 
     except Exception as e:
