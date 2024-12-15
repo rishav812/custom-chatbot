@@ -166,4 +166,26 @@ def insert_to_keywords_table(db, words:list[str], chunkId:str):
     except Exception as e:
         print(e, "error in insert_to_keywords_table")
 
+
+async def get_all_uploaded_documents(db:Session):
+    try:
+        documents= db.query(TrainedDocument).filter(TrainedDocument.status!='deleting').order_by(TrainedDocument.created_ts.desc())
+        # print("documents===",documents)
+        if documents:
+            document_list=[]
+            for document in documents:
+                document_list.append(document)
+            
+            print("document_list===>",document_list)
+            return {
+                "data":document_list,
+                "success":True,
+                "message":"Documents retrieved successfully"
+            }
+        return {"message": "Something went wrong", "success": False}
+
+    except Exception as e:
+        print(e, "error in get documents")
+
+
      

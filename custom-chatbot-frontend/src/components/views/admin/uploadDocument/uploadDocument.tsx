@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ChatBot from "../../chat/ChatBot";
 import BotIcon from "../../../svgElements/BotIcon";
 import "./uploadDocument.css";
@@ -10,6 +10,7 @@ import {
 } from "firebase/storage";
 import { app } from "../../../../firebase";
 import {
+  getAllUploadedDocs,
   getPreSignedUrl,
   uploadAdminDocuments,
 } from "../../../../service/admin";
@@ -99,6 +100,15 @@ const UploadDocument: React.FC = () => {
       }
     }
   };
+
+  const getAllDocs = async () => {
+      const res=await getAllUploadedDocs();
+      console.log("res==>",res)
+  }
+
+  useEffect(() => {
+    getAllDocs()
+  }, []);
 
   return (
     <div className="upload-container">
