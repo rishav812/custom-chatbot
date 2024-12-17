@@ -88,6 +88,9 @@ def train_document(text, document_id):
             print(f"Chunk with id {chunk.id} is insert successfully")
             chunk_id=str(chunk.id)
             insert_to_keywords_table(db, keyword_list, chunk_id)
+            db.query(TrainedDocument).filter(TrainedDocument.id == document_id).update(
+                {TrainedDocument.status: "completed"}, synchronize_session="fetch"
+            )
 
     except Exception as e:
         print(e, "error in read_and_train_private_file")
