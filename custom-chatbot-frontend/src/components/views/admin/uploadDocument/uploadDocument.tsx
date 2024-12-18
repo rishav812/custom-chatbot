@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import ChatBot from "../../chat/ChatBot";
 import BotIcon from "../../../svgElements/BotIcon";
+// import Document from "../../../svgElements/Document";
+import Documents from "../../../svgElements/Document";
 import "./uploadDocument.css";
 import {
   getStorage,
@@ -15,11 +17,18 @@ import {
   uploadAdminDocuments,
 } from "../../../../service/admin";
 import Base64 from "base64-js";
+import { useInfiniteScroll } from "../../../hooks/useInfiniteScroll";
 
 const UploadDocument: React.FC = () => {
   const [openBot, setOpenBot] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [error, setError] = useState<string>("");
+  const { data, loading, fetchData } = useInfiniteScroll({
+    apiService: getAllUploadedDocs,
+    apiParams: {
+      user_id: 1,
+    },
+  });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = event.target;
@@ -101,34 +110,55 @@ const UploadDocument: React.FC = () => {
     }
   };
 
-  const getAllDocs = async () => {
-      const res=await getAllUploadedDocs();
-      console.log("res==>",res)
-  }
+  // const getAllDocs = async () => {
+  //   const res = await getAllUploadedDocs();
+  //   console.log("res==>", res);
+  // };
 
   useEffect(() => {
-    getAllDocs()
+    // getAllDocs();
+    fetchData({ firstLoad: true });
   }, []);
 
   return (
     <div className="upload-container">
-      {/* <h2>Training Documents</h2> */}
-      <div className="upload-box">
-        <label htmlFor="file-upload" className="upload-label">
-          <span>Upload PDF here</span>
-          <input
-            id="file-upload"
-            type="file"
-            accept="application/pdf"
-            onChange={handleFileChange}
-          />
-        </label>
-        <p>Maximum PDF size 15MB</p>
+      <div className="upload-container-left">
+        <div className="upload-box">
+          <label htmlFor="file-upload" className="upload-label">
+            <span>Upload PDF here</span>
+            <input
+              id="file-upload"
+              type="file"
+              accept="application/pdf"
+              onChange={handleFileChange}
+            />
+          </label>
+          <p>Maximum PDF size 15MB</p>
+        </div>
+        {error && <p className="error-message">{error}</p>}
+        <button className="upload-button" onClick={uploadDocument}>
+          Upload
+        </button>
       </div>
-      {error && <p className="error-message">{error}</p>}
-      <button className="upload-button" onClick={uploadDocument}>
-        Upload
-      </button>
+      <div className="upload-container-right">
+        {data.length > 0 ? (
+          data.map((doc: any, index: number) => {
+            return (
+              <div className="doc-lists" key={index}>
+                <div className="item">
+                  <Documents />
+                  {/* <BotIcon/> */}
+                  <p>{doc.name}</p>
+                </div>
+              </div>
+            );
+          })
+        ) : loading ? (
+          <p>Loading...</p>
+        ) : (
+          <h1>No filed uploaded</h1>
+        )}
+      </div>
       {uploadedFile && (
         <div className="uploaded-file">
           <span>{uploadedFile.name}</span>
@@ -143,13 +173,13 @@ const UploadDocument: React.FC = () => {
           <ChatBot />
         </div>
       )}
-      <button
+      {/* <button
         type="button"
         className="bot-icon-box"
         onClick={() => setOpenBot(!openBot)}
       >
         <BotIcon />
-      </button>
+      </button> */}
     </div>
   );
 };

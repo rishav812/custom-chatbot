@@ -97,13 +97,89 @@
     cursor: pointer;
 } */
 
-.upload-container {
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
+/* .upload-container {
+  width: 37%;
+  /* max-width: 480px; */
+/* margin: 12px;
+  padding: 30px;
   text-align: center;
   position: relative;
+} */
+
+.upload-container {
+  /* width: 90%;
+  max-width: 100%;
+  margin: 11px;
+  padding: 14px;
+  text-align: center;
+  position: relative;
+  display: flex; */
+  display: flex;
+  flex-direction: row; /* Horizontal layout */
+  justify-content: space-between; /* Space between items */
+  align-items: center; /* Center vertically */
+  width: 95%;
+  max-width: 100%;
+  padding: 10px;
+  margin: 0 auto;
+  /* max-height: 70vh; */
+}
+
+.doc-title {
+  text-align: center;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* .upload-container-left {
+  width: 37%;
+  /* max-width: 480px; */
+/* margin: 12px;
+  padding: 30px;
+  text-align: center;
+  position: relative;
+} */
+
+/* .upload-container-right {
+  width: 48%;
+  max-width: 100%;
+  margin: 36px;
+  padding: 6px;
+  height: 90px;
+} */
+
+.item {
+  margin: 10px 0;
+  padding: 5px;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.upload-container-left,
+.upload-container-right {
+  /* flex: 1; */
+  margin: 10px;
+}
+.upload-container-left{
+  width: 40%;
+}
+.upload-container-right {
+  margin: 50px 47px;
+  width: 45%;
+}
+
+/* .item {
+  margin-top: -17px;
+  margin-left: -100px;
+  white-space: pre-wrap;
+} */
+
+.doc-lists {
+  border: 1px solid #000; /* Thin black line for the boundary */
+  /* width: 100%;           Set the width as needed */
+  height: 100%; /* Set the height as needed */
+  box-sizing: border-box;
+  margin: 16px
 }
 
 .upload-container h2 {
@@ -117,11 +193,13 @@
   margin-bottom: 20px;
   position: relative;
   z-index: 1;
+  height: 163px;
 }
 
 .upload-label {
   display: block;
   cursor: pointer;
+  margin: 40px
 }
 
 .upload-label span {
