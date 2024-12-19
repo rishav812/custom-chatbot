@@ -18,6 +18,7 @@ import {
 } from "../../../../service/admin";
 import Base64 from "base64-js";
 import { useInfiniteScroll } from "../../../hooks/useInfiniteScroll";
+import { DOCUMENT_RESPONSE_TYPE } from "../../../../constants/commonConstants";
 
 const UploadDocument: React.FC = () => {
   const [openBot, setOpenBot] = useState(false);
@@ -150,6 +151,24 @@ const UploadDocument: React.FC = () => {
                   {/* <BotIcon/> */}
                   <p>{doc.name}</p>
                 </div>
+                {[
+                  DOCUMENT_RESPONSE_TYPE.pending,
+                  DOCUMENT_RESPONSE_TYPE.deleting,
+                ].includes(doc.status) ? (
+                  <div className="progress-loader">
+                    <p>
+                      {doc.status === DOCUMENT_RESPONSE_TYPE.pending
+                        ? "Training in Progress"
+                        : "Deleting in Progress"}
+                    </p>
+                    <div
+                      className="custom-spinner"
+                      role="status"
+                    >
+                      {/* <span className="sr-only">Loading...</span> */}
+                    </div>
+                  </div>
+                ) : null}
               </div>
             );
           })
@@ -173,13 +192,13 @@ const UploadDocument: React.FC = () => {
           <ChatBot />
         </div>
       )}
-      {/* <button
+      <button
         type="button"
         className="bot-icon-box"
         onClick={() => setOpenBot(!openBot)}
       >
         <BotIcon />
-      </button> */}
+      </button>
     </div>
   );
 };
