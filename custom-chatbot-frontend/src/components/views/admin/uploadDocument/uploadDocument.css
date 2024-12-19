@@ -149,6 +149,11 @@
 } */
 
 .item {
+  display: flex;
+  flex-direction: row; 
+  /* justify-content: space-between;  */
+  gap: 10px;
+  align-items: center; 
   margin: 10px 0;
   padding: 5px;
   word-break: break-word;
@@ -179,7 +184,8 @@
   /* width: 100%;           Set the width as needed */
   height: 100%; /* Set the height as needed */
   box-sizing: border-box;
-  margin: 16px
+  margin: 16px;
+  border-radius: 15px;
 }
 
 .upload-container h2 {
