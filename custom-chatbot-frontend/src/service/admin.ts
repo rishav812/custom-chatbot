@@ -13,6 +13,7 @@ import axios from "axios";
 import ApiResponse, {
   TApiState,
 } from "../resources/domain/entity/IApiResponse";
+import { MutableRefObject } from "react";
 
 const http = axios.create({
   baseURL: "http://localhost:8000",
@@ -23,7 +24,7 @@ const http = axios.create({
 
 export const getPreSignedUrl = (data: {
   fileFormat: string;
-  fileType:string
+  fileType: string;
 }): Promise<ApiResponse> => {
   return http.post("/api/v1/admin/pre-signed-url", data);
 };
@@ -35,6 +36,12 @@ export const uploadAdminDocuments = (data: {
   return http.post("/api/v1/admin/upload-document", data);
 };
 
-export const getAllUploadedDocs= ():Promise<ApiResponse> =>{
-  return http.get("/api/v1/admin/get-all-docs")
-}
+export const getAllUploadedDocs = (): Promise<ApiResponse> => {
+  return http.get("/api/v1/admin/get-all-docs");
+};
+
+export const checkDocTrainingStatus = (data: {
+  documents_ids: MutableRefObject<number[]>;
+}): Promise<ApiResponse> => {
+  return http.post("api/v1/admin/check-doc-status", data);
+};

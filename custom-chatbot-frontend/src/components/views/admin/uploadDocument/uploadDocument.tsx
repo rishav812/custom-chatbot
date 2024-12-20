@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { MutableRefObject, useEffect, useRef, useState } from "react";
 import ChatBot from "../../chat/ChatBot";
 import BotIcon from "../../../svgElements/BotIcon";
 // import Document from "../../../svgElements/Document";
@@ -12,18 +12,27 @@ import {
 } from "firebase/storage";
 import { app } from "../../../../firebase";
 import {
+  checkDocTrainingStatus,
   getAllUploadedDocs,
   getPreSignedUrl,
   uploadAdminDocuments,
 } from "../../../../service/admin";
-import Base64 from "base64-js";
 import { useInfiniteScroll } from "../../../hooks/useInfiniteScroll";
-import { DOCUMENT_RESPONSE_TYPE } from "../../../../constants/commonConstants";
+import {
+  DOCUMENT_RESPONSE_TYPE,
+  IDocumentList,
+} from "../../../../constants/commonConstants";
+import Download from "../../../svgElements/Download";
+import Delete from "../../../svgElements/Delete";
+import EyeOpen from "../../../svgElements/EyeOpen";
 
 const UploadDocument: React.FC = () => {
   const [openBot, setOpenBot] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [documentList, setDocumentList] = useState<IDocumentList[]>([]);
+  const pendingDocumentList: MutableRefObject<number[]> = useRef<number[]>([]);
   const [error, setError] = useState<string>("");
+  const documentListRef = useRef([]);
   const { data, loading, fetchData } = useInfiniteScroll({
     apiService: getAllUploadedDocs,
     apiParams: {
@@ -121,6 +130,37 @@ const UploadDocument: React.FC = () => {
     fetchData({ firstLoad: true });
   }, []);
 
+  useEffect(() => {
+    if (data.length) {
+      documentListRef.current = data;
+      setDocumentList(data);
+      const ids = [] as number[];
+      data.forEach((item: IDocumentList) => {
+        if (item.status === DOCUMENT_RESPONSE_TYPE.pending) {
+          ids.push(item?.id as unknown as number);
+        }
+      });
+      if (ids.length) {
+        pendingDocumentList.current = ids;
+      }
+      if (ids.length) {
+        startInterval();
+      }
+    }
+  }, [data]);
+
+  const startInterval = () => {
+    setInterval(documentUploadStatusCheck, 10000);
+  };
+
+  const documentUploadStatusCheck = () => {
+    if(documentListRef?.current?.length>0){
+      const res= checkDocTrainingStatus({
+        documents_ids:pendingDocumentList
+      })
+    }
+  };
+
   return (
     <div className="upload-container">
       <div className="upload-container-left">
@@ -161,14 +201,23 @@ const UploadDocument: React.FC = () => {
                         ? "Training in Progress"
                         : "Deleting in Progress"}
                     </p>
-                    <div
-                      className="custom-spinner"
-                      role="status"
-                    >
+                    <div className="custom-spinner" role="status">
                       {/* <span className="sr-only">Loading...</span> */}
                     </div>
                   </div>
-                ) : null}
+                ) : (
+                  <div className="item-right">
+                    <button type="button">
+                      <Download />
+                    </button>
+                    <button type="button">
+                      <Delete />
+                    </button>
+                    <button type="button">
+                      <EyeOpen />
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })
