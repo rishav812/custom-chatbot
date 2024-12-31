@@ -16,7 +16,7 @@ import ApiResponse, {
 import { MutableRefObject } from "react";
 
 const http = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "http://127.0.0.1:8000",
   headers: {
     "Content-Type": "application/json",
   },
@@ -40,8 +40,6 @@ export const getAllUploadedDocs = (): Promise<ApiResponse> => {
   return http.get("/api/v1/admin/get-all-docs");
 };
 
-export const checkDocTrainingStatus = (data: {
-  documents_ids: MutableRefObject<number[]>;
-}): Promise<ApiResponse> => {
+export const checkDocTrainingStatus = (data:{payload:number[]}): any => {
   return http.post("api/v1/admin/check-doc-status", data);
 };

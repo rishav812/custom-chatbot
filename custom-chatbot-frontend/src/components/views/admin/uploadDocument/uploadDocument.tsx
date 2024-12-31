@@ -32,8 +32,8 @@ const UploadDocument: React.FC = () => {
   const [documentList, setDocumentList] = useState<IDocumentList[]>([]);
   const pendingDocumentList: MutableRefObject<number[]> = useRef<number[]>([]);
   const [error, setError] = useState<string>("");
-  const documentListRef = useRef([]);
-  const { data, loading, fetchData } = useInfiniteScroll({
+  const documentListRef = useRef<IDocumentList[]>([]);
+  const { data, loading, fetchData, setData } = useInfiniteScroll({
     apiService: getAllUploadedDocs,
     apiParams: {
       user_id: 1,
@@ -108,7 +108,7 @@ const UploadDocument: React.FC = () => {
     if (uploadedFile) {
       const file = uploadedFile;
       const url = await storePdfFile(file);
-      console.log("url=========", url);
+      // console.log("url=========", url);
       if (url) {
         // console.log("filee name=",file.name.split(".")[0])
         const res = await uploadAdminDocuments({
@@ -116,6 +116,15 @@ const UploadDocument: React.FC = () => {
           signedUrl: url as string,
         });
         console.log("ress=======", res);
+        if (res.status) {
+          // toast.success("Document training started");
+          alert("Document training started");
+          const temp = [...documentList];
+          temp.splice(0, 0, res.data?.data as IDocumentList);
+          setData(temp);
+        } else {
+          // toast.error("something went wrong");
+        }
       }
     }
   };
@@ -129,6 +138,8 @@ const UploadDocument: React.FC = () => {
     // getAllDocs();
     fetchData({ firstLoad: true });
   }, []);
+
+  console.log("data==>", data);
 
   useEffect(() => {
     if (data.length) {
@@ -153,12 +164,32 @@ const UploadDocument: React.FC = () => {
     setInterval(documentUploadStatusCheck, 10000);
   };
 
-  const documentUploadStatusCheck = () => {
-    if(documentListRef?.current?.length>0){
-      const res= checkDocTrainingStatus({
-        documents_ids:pendingDocumentList
-      })
+  const documentUploadStatusCheck = async () => {
+    const documentId: any = [];
+    data.filter((it: any) => {
+      if (it.status === "pending") {
+        documentId.push({ id: it.id });
+      }
+    });
+    console.log("documentId==>", documentId);
+
+    if (documentListRef?.current?.length > 0) {
+      console.log(pendingDocumentList.current, "pendingDocumentList.current");
+      const res = await checkDocTrainingStatus({
+        payload: documentId,
+      });
+      console.log("ressssssssssss", res);
+      // console.log("interval check res==>",res);
+      if (res?.data?.data?.length) {
+        res.data.data.forEach((item: { status: string; id: number }) => {
+          documentListRef.current[documentListRef.current.findIndex((i: IDocumentList) => i.id === item.id as unknown as string)].status = item.status;
+        });
+      //   res.data.forEach(item => {
+      //     documentListRef.current.findIndex((i) => i.id === item.id);
+      //   });
+      // }
     }
+  }
   };
 
   return (

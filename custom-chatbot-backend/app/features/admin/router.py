@@ -1,8 +1,8 @@
 from fastapi import FastAPI, APIRouter, Depends, Request
 from app.database import get_db
 from sqlalchemy.orm import Session
-from app.features.admin.repository import get_all_uploaded_documents, read_and_train_private_file
-from app.features.admin.schemas import PreSignedUrl, uploadDocuments
+from app.features.admin.repository import check_status, get_all_uploaded_documents, read_and_train_private_file
+from app.features.admin.schemas import DocumentListSchema, PreSignedUrl, uploadDocuments
 
 
 router = APIRouter(tags=["Admin"], prefix="/admin")
@@ -29,3 +29,17 @@ async def upload_documents(
 @router.get("/get-all-docs")
 async def get_all_documents(db: Session = Depends(get_db)):
     return await get_all_uploaded_documents(db)
+
+
+@router.post("/check-doc-status")
+async def check_document_status(
+    request: Request, data: DocumentListSchema, db: Session = Depends(get_db)
+):
+    # print("data===>", data)
+    print("document_ids===>",data.payload[0])
+    # return {
+    #     "data": [],
+    #     "success": True,
+    #     "message": "status retrieved successfully.",
+    # }
+    return await check_status(data.payload[0].id, db)

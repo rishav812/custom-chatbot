@@ -23,10 +23,10 @@ export const useInfiniteScroll = ({
       const res = await apiService({
         ...apiParams,
       });
-      console.log("res from commonhook====>", res);
+      // console.log("res from commonhook====>", res);
       if (res?.data) {
         const info = res?.data.data;
-        console.log("info===>", Object.values(info), info);
+        // console.log("info===>", Object.values(info), info);
         setData(info);
       } else {
       }
@@ -34,5 +34,5 @@ export const useInfiniteScroll = ({
     },
     []
   );
-  return { fetchData, loading, data };
+  return { fetchData, loading, data, setData};
 };
