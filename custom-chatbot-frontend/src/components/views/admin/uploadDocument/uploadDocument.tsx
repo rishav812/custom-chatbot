@@ -182,15 +182,17 @@ const UploadDocument: React.FC = () => {
       // console.log("interval check res==>",res);
       if (res?.data?.data?.length) {
         res.data.data.forEach((item: { status: string; id: number }) => {
-          documentListRef.current[documentListRef.current.findIndex((i: IDocumentList) => i.id === item.id as unknown as string)].status = item.status;
+          documentListRef.current[
+            documentListRef.current.findIndex(
+              (i: IDocumentList) => i.id === (item.id as unknown as string)
+            )
+          ].status = item.status;
         });
-      //   res.data.forEach(item => {
-      //     documentListRef.current.findIndex((i) => i.id === item.id);
-      //   });
-      // }
+        setData(documentListRef.current);
+      }
     }
-  }
   };
+  console.log("docume`ntListRef==>", data);
 
   return (
     <div className="upload-container">
@@ -215,6 +217,9 @@ const UploadDocument: React.FC = () => {
       <div className="upload-container-right">
         {data.length > 0 ? (
           data.map((doc: any, index: number) => {
+            if(doc.status==="pending"){
+              console.log("pending doc===",doc.status)
+            }
             return (
               <div className="doc-lists" key={index}>
                 <div className="item">

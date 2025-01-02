@@ -36,10 +36,9 @@ async def check_document_status(
     request: Request, data: DocumentListSchema, db: Session = Depends(get_db)
 ):
     # print("data===>", data)
-    print("document_ids===>",data.payload[0])
     # return {
     #     "data": [],
     #     "success": True,
     #     "message": "status retrieved successfully.",
     # }
-    return await check_status(data.payload[0].id, db)
+    return await check_status(data, db)
