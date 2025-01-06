@@ -4,6 +4,7 @@ import BotIcon from "../../../svgElements/BotIcon";
 // import Document from "../../../svgElements/Document";
 import Documents from "../../../svgElements/Document";
 import "./uploadDocument.css";
+import { toast } from "react-toastify";
 import {
   getStorage,
   ref,
@@ -31,6 +32,8 @@ const UploadDocument: React.FC = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [documentList, setDocumentList] = useState<IDocumentList[]>([]);
   const pendingDocumentList: MutableRefObject<number[]> = useRef<number[]>([]);
+  const [fileLoading, setFileLoading] = useState<boolean>(false);
+  const intervalIdRef: any = useRef(null);
   const [error, setError] = useState<string>("");
   const documentListRef = useRef<IDocumentList[]>([]);
   const { data, loading, fetchData, setData } = useInfiniteScroll({
@@ -106,6 +109,7 @@ const UploadDocument: React.FC = () => {
 
   const uploadDocument = async () => {
     if (uploadedFile) {
+      setFileLoading(true);
       const file = uploadedFile;
       const url = await storePdfFile(file);
       // console.log("url=========", url);
@@ -118,24 +122,20 @@ const UploadDocument: React.FC = () => {
         console.log("ress=======", res);
         if (res.status) {
           // toast.success("Document training started");
-          alert("Document training started");
+          toast.success("Document training started");
           const temp = [...documentList];
           temp.splice(0, 0, res.data?.data as IDocumentList);
           setData(temp);
         } else {
-          // toast.error("something went wrong");
+          toast.error("something went wrong");
         }
       }
     }
+    setUploadedFile(null)
+    setFileLoading(false);
   };
 
-  // const getAllDocs = async () => {
-  //   const res = await getAllUploadedDocs();
-  //   console.log("res==>", res);
-  // };
-
   useEffect(() => {
-    // getAllDocs();
     fetchData({ firstLoad: true });
   }, []);
 
@@ -145,51 +145,50 @@ const UploadDocument: React.FC = () => {
     if (data.length) {
       documentListRef.current = data;
       setDocumentList(data);
-      const ids = [] as number[];
-      data.forEach((item: IDocumentList) => {
-        if (item.status === DOCUMENT_RESPONSE_TYPE.pending) {
-          ids.push(item?.id as unknown as number);
+      const documentId: any = [];
+      data.filter((it: any) => {
+        if (it.status === "pending") {
+          documentId.push({ id: it.id });
         }
       });
-      if (ids.length) {
-        pendingDocumentList.current = ids;
-      }
-      if (ids.length) {
-        startInterval();
+      if (documentId.length) {
+        startInterval(documentId);
       }
     }
   }, [data]);
 
-  const startInterval = () => {
-    setInterval(documentUploadStatusCheck, 10000);
+  const startInterval = (documentId: any) => {
+    intervalIdRef.current = setInterval(
+      () => documentUploadStatusCheck(documentId),
+      10000
+    );
   };
 
-  const documentUploadStatusCheck = async () => {
-    const documentId: any = [];
-    data.filter((it: any) => {
-      if (it.status === "pending") {
-        documentId.push({ id: it.id });
-      }
-    });
-    console.log("documentId==>", documentId);
-
-    if (documentListRef?.current?.length > 0) {
-      console.log(pendingDocumentList.current, "pendingDocumentList.current");
+  const documentUploadStatusCheck = async (documentId: any) => {
+    if (documentId?.length > 0) {
+      console.log(documentId, "documentId");
       const res = await checkDocTrainingStatus({
         payload: documentId,
       });
-      console.log("ressssssssssss", res);
-      // console.log("interval check res==>",res);
       if (res?.data?.data?.length) {
-        res.data.data.forEach((item: { status: string; id: number }) => {
-          documentListRef.current[
-            documentListRef.current.findIndex(
-              (i: IDocumentList) => i.id === (item.id as unknown as string)
-            )
-          ].status = item.status;
-        });
-        setData(documentListRef.current);
+        const updatedDocumentList = documentListRef.current.map(
+          (doc: IDocumentList, index: number) => {
+            const updatedDoc = res.data.data.find(
+              (item: { id: number }) =>
+                item.id === (doc.id as unknown as number)
+            );
+            documentId.splice(index, 1);
+            return updatedDoc ? { ...doc, status: updatedDoc.status } : doc;
+          }
+        );
+
+        // Update the state and the ref
+        toast.success("Document trained successfully");
+        documentListRef.current = updatedDocumentList;
+        setData(updatedDocumentList);
       }
+    } else {
+      clearInterval(intervalIdRef.current);
     }
   };
   console.log("docume`ntListRef==>", data);
@@ -210,15 +209,34 @@ const UploadDocument: React.FC = () => {
           <p>Maximum PDF size 15MB</p>
         </div>
         {error && <p className="error-message">{error}</p>}
-        <button className="upload-button" onClick={uploadDocument}>
-          Upload
+        <button
+          className={`upload-button ${fileLoading ? "loading" : ""}`}
+          disabled={fileLoading}
+          onClick={uploadDocument}
+        >
+          {fileLoading ? (
+            <>
+              <span className="spinner-border"></span> Uploading...
+            </>
+          ) : (
+            "Upload"
+          )}
         </button>
+
+        {uploadedFile && (
+          <div className="uploaded-file">
+            <span>{uploadedFile.name}</span>
+            <div className="file-actions">
+              <button onClick={() => setUploadedFile(null)}>Delete</button>
+            </div>
+          </div>
+        )}
       </div>
       <div className="upload-container-right">
         {data.length > 0 ? (
           data.map((doc: any, index: number) => {
-            if(doc.status==="pending"){
-              console.log("pending doc===",doc.status)
+            if (doc.status === "pending") {
+              console.log("pending doc===", doc.status);
             }
             return (
               <div className="doc-lists" key={index}>
@@ -263,15 +281,7 @@ const UploadDocument: React.FC = () => {
           <h1>No filed uploaded</h1>
         )}
       </div>
-      {uploadedFile && (
-        <div className="uploaded-file">
-          <span>{uploadedFile.name}</span>
-          <div className="file-actions">
-            <button>Download</button>
-            <button onClick={() => setUploadedFile(null)}>Delete</button>
-          </div>
-        </div>
-      )}
+
       {openBot && (
         <div className="chat-container">
           <ChatBot />
