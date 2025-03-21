@@ -5,6 +5,11 @@ import "./Chat.css";
 import { Controller, useForm } from "react-hook-form";
 import CommonInput from "../../formElements/commonInput/commonInput";
 import BotIcon from "../../svgElements/BotIcon";
+import NewBotIcon from "../../svgElements/NewBotIcon";
+import CloseIcon from "../../svgElements/CloseIcon";
+import SendIcon from "../../svgElements/SendIcon";
+import TypingLoader from "./TypingLoader";
+// import "../../../styles/ChatBot.css";
 
 interface IFormInput {
   chatInput: string;
@@ -19,20 +24,35 @@ interface IMessages {
   time?: string;
 }
 
-const ChatBot: React.FC = () => {
+interface ChatInterfaceProps {
+  onClose: () => void;
+}
+
+const ChatInterface: React.FC<ChatInterfaceProps> = ({
+  onClose,
+}: ChatInterfaceProps) => {
   const [openBot, setOpenBot] = useState(false);
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<IFormInput>();
-  const [messages, setMessages] = useState<IMessages[]>([]);
+  const [messages, setMessages] = useState<IMessages[]>([
+    {
+      mt: "message_upload_confirm",
+      sid: "123",
+      message: "Hello! How can I help you?",
+      isBot: true,
+    },
+  ]);
   const [appendText, setAppendText] = useState("");
   const chunkMessageRef = useRef<{ text: string }>({
     text: "",
   });
 
   const [connect, setConnect] = useState(false);
+  const [showTyping, setShowTyping] = useState(false);
   const socketRef = useRef<any>();
 
   useEffect(() => {
@@ -46,17 +66,20 @@ const ChatBot: React.FC = () => {
         setAppendText(chunkMessageRef.current.text);
       } else if (data.mt === "message_upload_confirm") {
         if (!data.isBot) {
-          console.log("here comes user message first");
+          setShowTyping(true);
           setMessages((prevMessages) => [...prevMessages, data]);
         }
         if (data.isBot) {
+          setShowTyping(false);
           setMessages((prevMessages) => [...prevMessages, data]);
         }
+        setAppendText("");
+        chunkMessageRef.current = { text: "" };
       }
     };
 
     if (!socketRef.current) {
-      const socket = io("http://localhost:8000/", { path: "/socket.io/" });
+      const socket = io("http://127.0.0.1:8000/", { path: "/socket.io" });
       socketRef.current = socket;
 
       socket.on("connect", () => {
@@ -90,47 +113,62 @@ const ChatBot: React.FC = () => {
         timezone: moment().format("Z").toString(),
       };
       socket.emit("message", messageData);
+      reset({ chatInput: "" });
     }
   };
 
   return (
-    <div className="chatContainer">
-      <div className="chatHeader">
-        <div className="Header">
-          <div>
-            <div>AI Dev</div>
-          </div>
-          <div>
-            <p>{connect ? "online" : "offline"}</p>
-          </div>
+    <div className="chatbot-interface">
+      <div className="chat-header">
+        <div className="chat-header-title">
+          <NewBotIcon />
+          <h3>AI Dev</h3>
+          <span>{connect ? "online" : "offline"}</span>
         </div>
+        <button
+          onClick={onClose}
+          className="close-button"
+          aria-label="Close chat"
+        >
+          <CloseIcon />
+        </button>
       </div>
-      <ul className="messageList">
+      <ul className="messages-container">
         {messages.map((message, index) => (
-          <li
+          <div
             key={index}
-            className={`messageItem ${message.isBot ? "bot" : "user"}`}
+            className={`message ${message.isBot ? "bot" : "user"}`}
           >
-            {message.message}
-          </li>
+            <div className="message-content">
+              <p>{message.message}</p>
+              {/* <div className="message-time">{formatTime(message.timestamp)}</div> */}
+            </div>
+          </div>
         ))}
       </ul>
-      <form className="chatForm" onSubmit={handleSubmit(sendMessage)}>
-        <CommonInput
-          required
-          control={control}
-          className="chatInput"
-          name="chatInput"
-          placeholder="Type your message"
-          type="text"
-          error={errors?.chatInput}
-        />
-        <button className="chatButton" type="submit">
-          Send
-        </button>
-      </form>
+      {showTyping && !appendText && (
+        <div>
+          <TypingLoader />
+        </div>
+      )}
+      <div className="input-area">
+        <form className="input-container" onSubmit={handleSubmit(sendMessage)}>
+          <CommonInput
+            required
+            control={control}
+            className="message-input"
+            name="chatInput"
+            placeholder="Type your message"
+            type="text"
+            error={errors?.chatInput}
+          />
+          <button className="send-button" type="submit">
+            <SendIcon />
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
 
-export default ChatBot;
+export default ChatInterface;

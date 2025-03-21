@@ -1,0 +1,330 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: "Arial", sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+  }
+  
+  .container {
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  .sidebar {
+    width: 250px;
+    background-color: #1a1a1a;
+    color: white;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sidebar-header {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid #333;
+    margin-bottom: 20px;
+  }
+  
+  .sidebar-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .sidebar-tabs {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sidebar-tab {
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s, font-weight 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .sidebar-tab:hover {
+    background-color: #333;
+  }
+
+  .sidebar-tab.active {
+    background-color: #2c2c2c;
+    border-left: 4px solid #3b82f6;
+    padding-left: 17px;
+  }
+  
+  .sidebar-tab-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .main-content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+  }
+  
+  .page-header {
+    margin-bottom: 30px;
+  }
+  
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+  }
+  
+  .training-layout {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+  
+  .upload-section {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .pdf-list-section {
+    flex: 1;
+    min-width: 300px;
+    /* margin: 10px; */
+  }
+  
+  .section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #555;
+  }
+  
+  .upload-box {
+    border: 2px dashed #ccc;
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 8px;
+    background-color: #fff;
+    transition: border-color 0.3s;
+    margin-bottom: 22px;
+  }
+  
+  .upload-box:hover {
+    border-color: #3b82f6;
+  }
+  
+  .upload-text {
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    color: #555;
+  }
+  
+  .upload-size-limit {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 20px;
+  }
+  
+  .upload-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1;
+    transition: background-color 0.3s ease;
+    gap: 10px;
+  }
+  
+  .upload-button:hover {
+    background-color: #333;
+  }
+  
+  .upload-button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+  }
+
+  .upload-button.loading {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .upload-label {
+    display: block;
+    cursor: pointer;
+  }
+  
+  .upload-label span {
+    font-size: 16px;
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .upload-label input {
+    display: none;
+  }
+
+  .error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+  }
+
+  .uploaded-file {
+    background-color: #bbb;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    column-gap: 56px;
+    max-width: 478px;
+    padding: 16px;
+    margin-top: 23px;
+  }
+  
+  .uploaded-file span {
+    flex-grow: 1;
+    text-align: left;
+  }
+
+  .file-actions button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    z-index: 1;
+    padding: 2px;
+    font-size: 15px;
+    box-sizing: border-box;
+    border: 2px solid #fff;
+    font-style: oblique;
+  }
+
+  .progress-loader{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    font-size: 16px; /* Adjust font size for text */
+    color: #333;
+  }
+  
+  .pdf-list {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    column-gap: 56px;
+    max-width: 478px;
+    padding: 16px;
+    margin: 7px;
+  }
+  
+  .pdf-item {
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .pdf-item:last-child {
+    border-bottom: none;
+  }
+  
+  .pdf-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .pdf-icon {
+    color: #555;
+  }
+  
+  .pdf-actions {
+    display: flex;
+    gap: 15px;
+  }
+
+  .action-btn{
+    background: none;
+    border: none;
+  }
+  
+  .pdf-action-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #555;
+    transition: color 0.3s;
+  }
+  
+  .pdf-action-button:hover {
+    color: #000;
+  }
+  
+  .pdf-action-button.delete:hover {
+    color: #e53e3e;
+  }
+
+  .spinner-border {
+    width: 16px;
+    height: 16px;
+    border: 3px solid #fff;
+    border-top: 3px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  .custom-spinner {
+    width: 1.5rem; /* Spinner size */
+    height: 1.5rem;
+    border: 3px solid #ddd; /* Light grey for the spinner track */
+    border-top: 3px solid #007bff; /* Blue color for the spinner indicator */
+    border-radius: 50%; /* Make the spinner circular */
+    animation: spin 1s linear infinite; /* Rotating animation */
+  }
+  
+  /* Spinner Animation */
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .chat-history-page {
+    padding: 20px;
+  }
+  
+  .chat-history-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  .chat-history-empty {
+    text-align: center;
+    padding: 50px;
+    color: #888;
+  }
+  
+  

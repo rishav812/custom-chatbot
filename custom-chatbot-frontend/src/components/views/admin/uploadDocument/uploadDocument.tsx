@@ -3,7 +3,8 @@ import ChatBot from "../../chat/ChatBot";
 import BotIcon from "../../../svgElements/BotIcon";
 // import Document from "../../../svgElements/Document";
 import Documents from "../../../svgElements/Document";
-import "./uploadDocument.css";
+// import "./uploadDocument.css";
+import "../../../../styles/global.css";
 import { toast } from "react-toastify";
 import {
   getStorage,
@@ -131,7 +132,7 @@ const UploadDocument: React.FC = () => {
         }
       }
     }
-    setUploadedFile(null)
+    setUploadedFile(null);
     setFileLoading(false);
   };
 
@@ -194,106 +195,93 @@ const UploadDocument: React.FC = () => {
   console.log("docume`ntListRef==>", data);
 
   return (
-    <div className="upload-container">
-      <div className="upload-container-left">
-        <div className="upload-box">
-          <label htmlFor="file-upload" className="upload-label">
-            <span>Upload PDF here</span>
-            <input
-              id="file-upload"
-              type="file"
-              accept="application/pdf"
-              onChange={handleFileChange}
-            />
-          </label>
-          <p>Maximum PDF size 15MB</p>
-        </div>
-        {error && <p className="error-message">{error}</p>}
-        <button
-          className={`upload-button ${fileLoading ? "loading" : ""}`}
-          disabled={fileLoading}
-          onClick={uploadDocument}
-        >
-          {fileLoading ? (
-            <>
-              <span className="spinner-border"></span> Uploading...
-            </>
-          ) : (
-            "Upload"
-          )}
-        </button>
-
-        {uploadedFile && (
-          <div className="uploaded-file">
-            <span>{uploadedFile.name}</span>
-            <div className="file-actions">
-              <button onClick={() => setUploadedFile(null)}>Delete</button>
-            </div>
+    <div>
+      <div className="page-header">
+        <h1>Bot Training</h1>
+      </div>
+      <div className="training-layout">
+        <div className="upload-section">
+          <div className="upload-box">
+            <label htmlFor="file-upload" className="upload-label">
+              <span>Upload PDF here</span>
+              <input
+                id="file-upload"
+                type="file"
+                accept="application/pdf"
+                onChange={handleFileChange}
+              />
+            </label>
+            <p className="upload-size-limit">Maximum PDF size 15MB</p>
           </div>
-        )}
-      </div>
-      <div className="upload-container-right">
-        {data.length > 0 ? (
-          data.map((doc: any, index: number) => {
-            if (doc.status === "pending") {
-              console.log("pending doc===", doc.status);
-            }
-            return (
-              <div className="doc-lists" key={index}>
-                <div className="item">
-                  <Documents />
-                  {/* <BotIcon/> */}
-                  <p>{doc.name}</p>
-                </div>
-                {[
-                  DOCUMENT_RESPONSE_TYPE.pending,
-                  DOCUMENT_RESPONSE_TYPE.deleting,
-                ].includes(doc.status) ? (
-                  <div className="progress-loader">
-                    <p>
-                      {doc.status === DOCUMENT_RESPONSE_TYPE.pending
-                        ? "Training in Progress"
-                        : "Deleting in Progress"}
-                    </p>
-                    <div className="custom-spinner" role="status">
-                      {/* <span className="sr-only">Loading...</span> */}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="item-right">
-                    <button type="button">
-                      <Download />
-                    </button>
-                    <button type="button">
-                      <Delete />
-                    </button>
-                    <button type="button">
-                      <EyeOpen />
-                    </button>
-                  </div>
-                )}
+          {error && <p className="error-message">{error}</p>}
+          <button
+            className={`upload-button ${fileLoading ? "loading" : ""}`}
+            disabled={fileLoading}
+            onClick={uploadDocument}
+          >
+            {fileLoading ? (
+              <>
+                <span className="spinner-border"></span> Uploading...
+              </>
+            ) : (
+              "Upload"
+            )}
+          </button>
+          {uploadedFile && (
+            <div className="uploaded-file">
+              <span>{uploadedFile.name}</span>
+              <div className="file-actions">
+                <button onClick={() => setUploadedFile(null)}>Delete</button>
               </div>
-            );
-          })
-        ) : loading ? (
-          <p>Loading...</p>
-        ) : (
-          <h1>No filed uploaded</h1>
-        )}
-      </div>
-
-      {openBot && (
-        <div className="chat-container">
-          <ChatBot />
+            </div>
+          )}
         </div>
-      )}
-      <button
-        type="button"
-        className="bot-icon-box"
-        onClick={() => setOpenBot(!openBot)}
-      >
-        <BotIcon />
-      </button>
+        <div className="pdf-list-section">
+          <h2 className="section-title">PDF Files</h2>
+          {data.length > 0 ? (
+            data.map((doc: any, index: number) => {
+              return (
+                <div className="pdf-list" key={index}>
+                  <div className="pdf-info">
+                    <Documents />
+                    <BotIcon />
+                    <p>{doc.name}</p>
+                  </div>
+                  {[
+                    DOCUMENT_RESPONSE_TYPE.pending,
+                    DOCUMENT_RESPONSE_TYPE.deleting,
+                  ].includes(doc.status) ? (
+                    <div className="progress-loader">
+                      <p>
+                        {doc.status === DOCUMENT_RESPONSE_TYPE.pending
+                          ? "Training in Progress"
+                          : "Deleting in Progress"}
+                      </p>
+                      <div className="custom-spinner" role="status"></div>
+                    </div>
+                  ) : (
+                    <div className="pdf-actions">
+                      <button type="button" className="action-btn">
+                        <Download />
+                      </button>
+                      <button type="button" className="action-btn">
+                        <Delete />
+                      </button>
+                      <button type="button" className="action-btn">
+                        <EyeOpen />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          ) : loading ? (
+            <p>Loading...</p>
+          ) : (
+            <h1>No filed uploaded</h1>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

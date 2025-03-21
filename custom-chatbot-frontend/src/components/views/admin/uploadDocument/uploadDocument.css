@@ -216,7 +216,7 @@
   border: 3px solid #ddd; /* Light grey for the spinner track */
   border-top: 3px solid #007bff; /* Blue color for the spinner indicator */
   border-radius: 50%; /* Make the spinner circular */
-  animation: spinner-animation 1s linear infinite; /* Rotating animation */
+  animation: spin 1s linear infinite;/* Rotating animation */
 }
 
 .spinner-border {
@@ -226,14 +226,14 @@
   border: 1px solid #ddd; /* Light grey for the spinner track */
   border-top: 3px solid #007bff; /* Blue color for the spinner indicator */
   border-radius: 50%; /* Make the spinner circular */
-  animation: spinner-animation 1s linear infinite;
+  animation: spin 1s linear infinite;
 }
 
-@keyframes spinner-animation {
-  0% {
+@keyframes spin {
+  from {
     transform: rotate(0deg);
   }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }

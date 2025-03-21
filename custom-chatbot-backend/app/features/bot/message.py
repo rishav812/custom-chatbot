@@ -1,6 +1,13 @@
+from requests import Session
+from app.database import get_db
+from app.features.bot.semantic_search import BotGraphSearch
 from app.features.bot.utils.greeting_response import create_greetings_response
 from app.features.bot.utils.local_semantic_similarity.auto_reply import can_auto_reply
-from app.features.bot.utils.response import generate_response
+from app.features.bot.utils.response import GeminiChat
+from keybert import KeyBERT
+from app.models.chunks import Chunk
+from app.models.keywords import Keywords
+from app.models.milvus.collection.milvus_collection import keyword_collection
 # AIzaSyB0UjIOMxAH8DVQJWeojCIMXk2SmpSSmPQ
 
 class BotMessage:
@@ -54,15 +61,72 @@ class BotMessage:
         :param user_input: Text input from the user
         :return: Boolean indicating if the bot has responded or not
         """
+        db = next(get_db())
+
+        keyword_model = KeyBERT()
+
         if await self.auto_reply_handler(user_input, "greeting"):
             return False
         
-        gemini_resp=await generate_response(user_input)
-        await self.socket_response.create_bot_response(
-                gemini_resp,
-                self.time_zone,
-                None,
-                msg_type="normal_msg"
-        )
+        questions_list = [user_input.lower()]
+        keyword=keyword_model.extract_keywords(user_input)
+        print("keyword====>", keyword)
+        keyword_list=[word[0] for word in keyword]
+        print("keyword_list====>", keyword_list)
+        is_result_found = False
+        milvus_results = await self.milvus_search(db, questions_list, keyword_list)
+
+        if milvus_results:
+            is_result_found=await self.handle_keyword_milvus_response(db, milvus_results, user_input)
+            if is_result_found:
+                return False
+            else:
+                return True
+        return True
+
+            
 
         
+        
+
+    async def milvus_search(self, db: Session, questions_list, keyword_list):
+        """
+        Searches the Milvus database for the most similar question to the user input.      
+        """
+        
+        milvus_results=await BotGraphSearch(db=db).search_keyword_vector(questions_list, keyword_collection)
+        print("milvus_results====>", milvus_results)    
+        return milvus_results
+    
+    async def handle_keyword_milvus_response(self, db: Session, keyword_ids:list[str], user_message:str):
+        """
+        Handles the response from the Milvus search.
+        """
+        
+        result=db.query(Keywords.chunk_id).filter(Keywords.id.in_(keyword_ids)).all()
+        print("result======>", result)
+        chunk_ids=[]
+        for res in result:
+            ids=res[0].split(",")
+            print("chunk_ids=====>", ids)
+            chunk_ids.extend(ids)
+        chunk_ids = list(set(map(int, chunk_ids)))
+        print("chunk_ids====>", chunk_ids)
+        if chunk_ids:
+            chunk_result=db.query(Chunk.chunk).filter(Chunk.id.in_(chunk_ids)).all()
+            print("chunk_result====>", chunk_result)
+            chunk_details = [result.chunk for result in chunk_result]
+            print("chunk_details====>", chunk_details)
+            if len(chunk_details)>0:
+                # response = await GeminiChat.ask_gemini(chunk_details, user_message)
+                gemini_chat = GeminiChat()  # ✅ Create an instance
+                response = await gemini_chat.ask_gemini(chunk_details, user_message)  # ✅ Call method on the instance
+                print("response====>", response)
+                await self.socket_response.create_bot_response(
+                    response,
+                    self.time_zone,
+                    None,
+                    msg_type="bot_msg"
+                )
+                return True
+        return False

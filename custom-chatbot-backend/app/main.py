@@ -3,6 +3,7 @@ from typing import List
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import socketio
+import uvicorn
 from app.features.bot.router import SocketManager, router as bot_router
 from app.features.admin.router import router as admin_router
 from app.models.milvus.collection.milvus_collection import create_collection
@@ -58,3 +59,6 @@ def get_application():
 
 
 app = get_application()
+
+# if __name__ == "__main__":
+#     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

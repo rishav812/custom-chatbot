@@ -1,4 +1,5 @@
 from pymilvus import (
+    MilvusException,
     connections,
     CollectionSchema,
     FieldSchema,
@@ -7,9 +8,10 @@ from pymilvus import (
 )
 from pymilvus.exceptions import ConnectionNotExistException
 
+from app.models.milvus.client import connect_to_milvus
 
 
-def create_collection():
+def create_collection(tries: int = 0):
     fields = [
         FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),
         FieldSchema(
@@ -34,6 +36,16 @@ def create_collection():
             )
         collection.load()
 
-    except ConnectionNotExistException:
-        print("error in milvus connection") 
+    except ConnectionNotExistException as e:
+        try:
+            connect_to_milvus()
+        except MilvusException as e:
+            # logger.error(e)
+            if tries < 5:
+                return create_collection(tries + 1)
+            raise e
+        return create_collection(tries + 1)
     return collection
+
+
+keyword_collection = create_collection()

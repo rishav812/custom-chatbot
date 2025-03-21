@@ -17,9 +17,9 @@ router = APIRouter()
 class SocketManager:
     def __init__(self):
         self.server = socketio.AsyncServer(
-            cors_allowed_origins=["http://localhost:8000", "http://localhost:3000"],
+            cors_allowed_origins=[],
             async_mode="asgi",
-            engineio_logger=True,
+            # engineio_logger=True,
         )
         self.app = socketio.ASGIApp(self.server)
         self.active_client_sid = None
@@ -32,9 +32,9 @@ class SocketManager:
             if self.active_client_sid is None:
                 self.active_client_sid = sid
                 print(f"Client connected: {sid}")
-            # else:
-            #     print(f"Rejecting connection attempt from: {sid}")
-            #     await self.server.disconnect(sid)
+            else:
+                print(f"Rejecting connection attempt from: {sid}")
+                await self.server.disconnect(sid)
 
         @self.server.event
         async def disconnect(sid):
@@ -81,14 +81,26 @@ class SocketManager:
                 time_zone=upload_data.timezone,
             )
             no_answer_found = await bot_message.send_bot_message(upload_data.message)
+            print("no_answer_found=======>", no_answer_found)
+            if no_answer_found:
+                default_answer = (
+                "Great question, we will train AI Rishav to answer this next time."
+            )
+                message = MessageData(
+                    time=current_time,
+                    sid=sid,
+                    message=default_answer,
+                    isBot=True,
+                    # token=token,
+                    mt="message_upload_confirm",
+                )
+                await server.emit("new_message", json.dumps(message.dict()), room=sid)
 
     def mount_to(self, path: str, app):
         app.mount(path, self.app)
 
 
 socket_manager = SocketManager()
-# socket_manager.mount_to("/socket.io", app)
-#  socket_app.mount_to("/socket.io", _app)
 
 
 @router.get("/text")
