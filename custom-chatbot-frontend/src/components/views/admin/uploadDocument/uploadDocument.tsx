@@ -244,7 +244,6 @@ const UploadDocument: React.FC = () => {
                 <div className="pdf-list" key={index}>
                   <div className="pdf-info">
                     <Documents />
-                    <BotIcon />
                     <p>{doc.name}</p>
                   </div>
                   {[

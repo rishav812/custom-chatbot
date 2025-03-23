@@ -1,7 +1,10 @@
+import asyncio
 import json
 import socketio
+import orjson
 from fastapi import FastAPI, APIRouter
 from datetime import datetime
+import time
 
 from app.features.bot.message import BotMessage
 from app.features.bot.schemas import MessageData, MessageUploadData
@@ -49,7 +52,6 @@ class SocketManager:
             now = datetime.utcnow()
             current_time = now.strftime("%H:%M")
             isError = False
-            print("handle-MESSAGES====================...")
             print(f"Message from {sid}: {data}")
             mt = data.get("mt", "")
             print("mt====", mt)
@@ -68,7 +70,11 @@ class SocketManager:
             )
             print("message====>", (message.dict()))
 
-            await server.emit("new_message", json.dumps(message.dict()), room=sid)
+            # Emit the message in the background
+            start_time = time.time()
+            await server.emit("new_message", orjson.dumps(message.dict()).decode("utf-8"), room=sid)
+            end_time = time.time()
+            print(f"Time taken to emit event: {end_time - start_time:.5f} seconds")
 
             socket_response = SocketIOResponse(
                 sio=server,

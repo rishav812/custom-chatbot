@@ -1,3 +1,4 @@
+import asyncio
 from requests import Session
 from app.database import get_db
 from app.features.bot.semantic_search import BotGraphSearch
@@ -104,29 +105,35 @@ class BotMessage:
         """
         
         result=db.query(Keywords.chunk_id).filter(Keywords.id.in_(keyword_ids)).all()
-        print("result======>", result)
         chunk_ids=[]
         for res in result:
             ids=res[0].split(",")
-            print("chunk_ids=====>", ids)
             chunk_ids.extend(ids)
         chunk_ids = list(set(map(int, chunk_ids)))
         print("chunk_ids====>", chunk_ids)
         if chunk_ids:
             chunk_result=db.query(Chunk.chunk).filter(Chunk.id.in_(chunk_ids)).all()
-            print("chunk_result====>", chunk_result)
             chunk_details = [result.chunk for result in chunk_result]
             print("chunk_details====>", chunk_details)
             if len(chunk_details)>0:
-                # response = await GeminiChat.ask_gemini(chunk_details, user_message)
-                gemini_chat = GeminiChat()  # ✅ Create an instance
-                response = await gemini_chat.ask_gemini(chunk_details, user_message)  # ✅ Call method on the instance
-                print("response====>", response)
+                gemini_chat = GeminiChat()
+                response_generator = await gemini_chat.ask_gemini(chunk_details, user_message)
+                print("response====>", response_generator)
+                # text = ""
+                # async for item in response_generator:
+                #     text += item
+                
+                # if text:
+                #     async def string_to_generator(data):
+                #         for char in data:
+                #             yield char
+                #             await asyncio.sleep(0.05)
+                #     generator = string_to_generator(text)
                 await self.socket_response.create_bot_response(
-                    response,
-                    self.time_zone,
-                    None,
-                    msg_type="bot_msg"
-                )
+                        response_generator,
+                        self.time_zone,
+                        None,
+                        msg_type="bot_msg"
+                    )
                 return True
         return False

@@ -54,11 +54,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [connect, setConnect] = useState(false);
   const [showTyping, setShowTyping] = useState(false);
   const socketRef = useRef<any>();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleMessage = (message: any) => {
       const data = JSON.parse(message);
-      console.log("data====>", data);
       if (data.mt === "chat_message_bot_partial") {
         chunkMessageRef.current = {
           text: (chunkMessageRef.current.text ?? "") + (data.partial ?? ""),
@@ -66,8 +66,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         setAppendText(chunkMessageRef.current.text);
       } else if (data.mt === "message_upload_confirm") {
         if (!data.isBot) {
-          setShowTyping(true);
-          setMessages((prevMessages) => [...prevMessages, data]);
+          setMessages((prevMessages) => {
+            const newMessages = [...prevMessages];
+            if(newMessages.length > 0 && newMessages[newMessages.length - 1].mt === "message_upload") {
+              newMessages.pop();
+            }
+            return [...newMessages, data];
+          });
+          };
+          // setMessages((prevMessages) => [...prevMessages, data]);
         }
         if (data.isBot) {
           setShowTyping(false);
@@ -76,7 +83,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         setAppendText("");
         chunkMessageRef.current = { text: "" };
       }
-    };
 
     if (!socketRef.current) {
       const socket = io("http://127.0.0.1:8000/", { path: "/socket.io" });
@@ -103,6 +109,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   }, []);
 
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
   const sendMessage = (data: any) => {
     const socket = socketRef.current;
     if (socket && socket.connected) {
@@ -114,6 +126,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       };
       socket.emit("message", messageData);
       reset({ chatInput: "" });
+      setMessages((prevMessages:any) => [...prevMessages, messageData]);
+      setShowTyping(true);
     }
   };
 
@@ -135,22 +149,22 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       </div>
       <ul className="messages-container">
         {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`message ${message.isBot ? "bot" : "user"}`}
-          >
-            <div className="message-content">
-              <p>{message.message}</p>
-              {/* <div className="message-time">{formatTime(message.timestamp)}</div> */}
+          <div key={index}>
+            <div className={`message ${message.isBot ? "bot" : "user"}`}>
+              <div className="message-content">
+                <p>{message.message}</p>
+                {/* <div className="message-time">{formatTime(message.timestamp)}</div> */}
+              </div>
             </div>
+            {showTyping && !message.isBot && index === messages.length - 1 && (
+              <div className="typing-loader-container">
+                <TypingLoader />
+              </div>
+            )}
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </ul>
-      {showTyping && !appendText && (
-        <div>
-          <TypingLoader />
-        </div>
-      )}
       <div className="input-area">
         <form className="input-container" onSubmit={handleSubmit(sendMessage)}>
           <CommonInput

@@ -2,11 +2,12 @@
   align-items: center;
   display: flex;
   height: 17px;
+  margin-top: 10px; /* Add margin to the TypingLoader */
 }
 
 .dot {
   animation: mercuryTypingAnimation 1.8s infinite ease-in-out;
-  background-color: #d3d3d3; /* Replace with a valid CSS color value */
+  background-color: #555; /* Darker color for the dots */
   border-radius: 50%;
   height: 7px;
   margin-right: 4px;
@@ -42,16 +43,20 @@
 @keyframes mercuryTypingAnimation {
   0% {
     transform: translateY(0px);
-    background-color: #d3d3d3;
+    background-color: #555; /* Darker color for the dots */
   }
   28% {
     transform: translateY(-7px);
-    background-color: #d3d3d3;
+    background-color: #555; /* Darker color for the dots */
   }
   44% {
     transform: translateY(0px);
-    background-color: #d3d3d3; /* Replace with a valid CSS color value */
+    background-color: #555; /* Darker color for the dots */
   }
+}
+
+.typing-loader-container {
+  margin-top: 10px; /* Add margin to the TypingLoader container */
 }
 
 .chatbot-container {
@@ -158,23 +163,31 @@
   }
   
   .messages-container {
-    flex: 1;
-    padding: 20px;
+    display: flex;
+    flex-direction: column; /* Change this line */
+    padding: 15px;
     overflow-y: auto;
-    background-color: #f9fafb;
+    height: 100%;
+  }
+
+  .messages-container::-webkit-scrollbar {
+    display: none; /* For Chrome, Safari, and Opera */
   }
   
   .message {
-    margin-bottom: 15px;
+    margin-bottom: 1px;
     display: flex;
   }
   
   .message.user {
     justify-content: flex-end;
+    text-align: start;
+    padding: 14px;
   }
   
   .message.bot {
     justify-content: flex-start;
+    margin-bottom: 29px;
   }
   
   .message-content {
@@ -183,10 +196,12 @@
     border-radius: 12px;
     position: relative;
     word-wrap: break-word; /* Ensure long messages wrap properly */
+    text-align: start;
+    padding: 15px;
   }
   
   .user .message-content {
-    background-color: #3b82f6;
+    background-color: #44597b;
     color: white;
     border-top-right-radius: 4px;
   }
@@ -268,5 +283,4 @@
       max-width: 85%;
     }
   }
-  
-  
+

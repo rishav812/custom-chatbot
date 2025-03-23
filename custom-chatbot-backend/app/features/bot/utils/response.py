@@ -1,3 +1,4 @@
+import asyncio
 import os
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -55,33 +56,70 @@ class GeminiChat:
 
         return split_example_res
 
+    # async def ask_gemini(self, example_response, user_query: str = ""):
+    #     print(f"🔍 Debug: Type of self: {type(self)}")  # Add this line
+    #     example_response_chunked = self.split_messages(example_response)
+    #     responses = []
+
+    #     for example_chunk in example_response_chunked:
+    #         prompt = f"""
+    #         You are AI Rishav, a knowledgeable and articulate assistant trained to provide insightful, well-structured, and engaging responses. Your primary role is to assist users by referring strictly to the provided reference data while maintaining a natural and conversational tone.
+
+    #         Reference: {example_chunk}\n
+    #         Question: {user_query}\n
+    #         - Use the reference only to answer the question.
+    #         - Respond in a professional yet conversational manner.
+    #         - Provide a **detailed** response for every user input, covering all relevant aspects comprehensively.
+    #         - Avoid phrases like "Based on the reference" or "As mentioned in the document."
+    #         - If asked for an opinion, respond with confidence while staying within the reference.
+    #         - If you cannot answer using the reference, say:
+    #           "Great question! We will train AI Rishav to answer this next time."
+    #         """
+
+    #         model = genai.GenerativeModel(self.model_name)
+
+    #         response = model.generate_content(prompt) 
+    #         # response_stream = model.generate_content(prompt, stream=True)
+    #         # Process response
+    #         responses.append(response.text)
+    #         print("gemini-response====>", responses)
+    #         # for partial_response in response_stream:
+    #         #     yield partial_response.text  # ✅ Yielding chunk instead of returning full response
+    #         #     await asyncio.sleep(0.05)
+
+    #     return responses[0]
+
     async def ask_gemini(self, example_response, user_query: str = ""):
-        print(f"🔍 Debug: Type of self: {type(self)}")  # Add this line
         example_response_chunked = self.split_messages(example_response)
-        responses = []
 
-        for example_chunk in example_response_chunked:
-            prompt = f"""
-            You are AI Rishav, an expert bot designed to give helpful answers 
-            using the data listed below. Make sure to stick strictly to this data for your answers and avoid guessing or using information not included here. Always be polite and respectful in how you talk.
+        async def response_generator():
+            for example_chunk in example_response_chunked:
+                prompt = f"""
+                You are AI Rishav, a knowledgeable and articulate assistant trained to provide insightful, well-structured, and engaging responses. Your primary role is to assist users by referring strictly to the provided reference data while maintaining a natural and conversational tone.
 
-            Reference: {example_chunk}\n
-            Question: {user_query}\n
-            Use the reference only to answer the question.
-            Be informative, gentle, and formal.
-            If you can't answer the question with the reference, just say:
-            'Great question, we will train AI Rishav to answer this next time.'
-            """
+                Reference: {example_chunk}\n
+                Question: {user_query}\n
+                - Use the reference only to answer the question.
+                - Respond in a professional yet conversational manner.
+                - Provide a **detailed** response for every user input, covering all relevant aspects comprehensively.
+                - Avoid phrases like "Based on the reference" or "As mentioned in the document."
+                - If asked for an opinion, respond with confidence while staying within the reference.
+                - If you cannot answer using the reference, say:
+                "Great question! We will train AI Rishav to answer this next time."
+                """
 
-            model = genai.GenerativeModel(self.model_name)
+                model = genai.GenerativeModel(self.model_name)
 
-            response = model.generate_content(prompt)  # Send request to Gemini
+                response_stream = model.generate_content(prompt, stream=True)  # ✅ Ensure streaming
 
-            # Process response
-            responses.append(response.text)
-            print("gemini-response====>", responses)
+                # Yield response in chunks
+                for partial_response in response_stream:
+                    yield partial_response.text
+                    print("gemini-response====>", partial_response.text)
+                    await asyncio.sleep(0.1)  # ✅ Ensures async streaming
 
-        return responses[0]
+        return response_generator()  # ✅ Return async generator
+
 
 
 

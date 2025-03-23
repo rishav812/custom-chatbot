@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 import json
 import re
@@ -30,34 +31,38 @@ class SocketIOResponse:
             yield word
 
     async def create_bot_response(
-        self,
-        text: str,
-        time_zone: Optional[str] = None,
-        user_question: Optional[str] = None,
-        *,
-        msg_type: Optional[str] = "normal_msg",
-    ) -> Optional[str]:
-        """Creates bot message and sends it. Returns full text."""
+    self,
+    text: AsyncGenerator[str, None],  # ✅ Expect async generator here
+    time_zone: Optional[str] = None,
+    user_question: Optional[str] = None,
+    *,
+    msg_type: Optional[str] = "bot_msg",
+) -> Optional[str]:
+        """Creates bot message and sends it in a streaming manner."""
         now = datetime.utcnow()
         current_time = now.strftime("%H:%M")
         final_text = ""
-        print("text===>", text, "typee===============", type(text))
-        # text = self.async_word_generator(text)
+
         if msg_type != "followup_msg":
-            for t in text:
+            async for t in text:  # ✅ Stream response in real-time
                 if t:
                     final_text += t
                     message = MessagePartialUpload(
                         mt="chat_message_bot_partial", sid=self.sid, partial=t
                     )
-                    await self.sio.emit("new_message", json.dumps(message.dict()))
+                    await self.sio.emit("new_message", json.dumps(message.dict())) 
 
+                    await asyncio.sleep(0.1)  # ✅ Ensure async handling
+
+            # Final message after streaming
             message = MessageData(
                 time=current_time,
                 sid=self.sid,
-                message=text,
+                message=final_text,  # ✅ Send full collected response
                 isBot=True,
                 mt="message_upload_confirm",
             )
 
-            await self.sio.emit("new_message", json.dumps(message.dict()))
+            await self.sio.emit("new_message", json.dumps(message.dict()))  # ✅ Send final message
+
+
